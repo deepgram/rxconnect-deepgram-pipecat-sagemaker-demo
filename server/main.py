@@ -1,6 +1,6 @@
 """
 =============================================================================
-Pipecat + Deepgram Voice Agent Demo
+RxConnect Voice Agent Demo
 =============================================================================
 
 This demo shows how to build a real-time voice AI agent using:
@@ -51,7 +51,7 @@ from deepgram.core.events import EventType
 # INITIALIZE CLIENTS
 # =============================================================================
 
-app = FastAPI(title="Pipecat + Deepgram Voice Agent Demo")
+app = FastAPI(title="RxConnect Voice Agent Demo")
 
 # CORS for frontend communication
 app.add_middleware(
@@ -810,7 +810,7 @@ class VoiceAgent:
 async def root():
     """Health check endpoint."""
     return {
-        "message": "Pipecat + Deepgram Voice Agent Demo",
+        "message": "RxConnect Voice Agent Demo",
         "status": "running",
         "stt_mode": "SageMaker" if USE_SAGEMAKER_STT else "Cloud"
     }
@@ -884,7 +884,7 @@ if __name__ == "__main__":
     import uvicorn
     print("""
     ================================================================
-           Pipecat + Deepgram Voice Agent Demo                     
+           RxConnect Voice Agent Demo                     
                                                                    
        STT: Deepgram Nova-3 (SageMaker or Cloud)
        LLM: OpenAI GPT-4o-mini                                     

@@ -43,7 +43,7 @@ export const App = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Voice Agent Demo</h1>
+              <h1 className="text-xl font-bold text-white">RxConnect Voice Agent</h1>
               <p className="text-xs text-zinc-500">Deepgram + Pipecat + SageMaker</p>
             </div>
           </div>

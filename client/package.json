@@ -1,7 +1,7 @@
 {
-  "name": "pipecat-deepgram-demo",
+  "name": "rxconnect-deepgram-pipecat-sagemaker-demo",
   "version": "1.0.0",
-  "description": "Voice AI demo with Deepgram STT/TTS and Pipecat orchestration",
+  "description": "RxConnect Voice Agent - Deepgram STT/TTS with Pipecat on SageMaker",
   "private": true,
   "scripts": {
     "dev": "next dev",

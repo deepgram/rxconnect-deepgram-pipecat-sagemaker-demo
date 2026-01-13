@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Pipecat + Deepgram Voice Agent Demo',
+  title: 'RxConnect Voice Agent Demo',
   description: 'Real-time voice AI with Deepgram STT/TTS on AWS SageMaker',
 };
 

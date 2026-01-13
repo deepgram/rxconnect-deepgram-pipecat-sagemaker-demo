@@ -1,4 +1,4 @@
-# Pipecat + Deepgram Voice Agent Demo
+# RxConnect Voice Agent Demo
 
 A production-ready voice AI agent demonstrating real-time conversational AI using **Deepgram** for speech processing on **AWS SageMaker**, **Amazon Bedrock** for LLM, and **Pipecat** for orchestration — all running securely within an **AWS VPC**.
 
@@ -75,7 +75,7 @@ This demo teaches you how to build enterprise-grade voice AI applications:
 ## Project Structure
 
 ```
-pipecat-deepgram-demo/
+rxconnect-deepgram-pipecat-sagemaker-demo/
 ├── server/                      # Python FastAPI backend
 │   ├── main.py                  # Voice agent with Pipecat orchestration
 │   ├── requirements.txt         # Python dependencies
@@ -118,8 +118,8 @@ pipecat-deepgram-demo/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/deepgram/pipecat-deepgram-demo.git
-cd pipecat-deepgram-demo
+git clone https://github.com/deepgram/rxconnect-deepgram-pipecat-sagemaker-demo.git
+cd rxconnect-deepgram-pipecat-sagemaker-demo
 ```
 
 ### 2. Set Up the Backend
