@@ -10,7 +10,7 @@ This demo shows how to build a real-time voice AI agent using:
 - Pipecat for orchestration
 
 Architecture:
-    User Audio → Deepgram STT → LLM + Functions → Deepgram TTS → Audio Response
+    User Audio -> Deepgram STT -> LLM + Functions -> Deepgram TTS -> Audio Response
 
 All components can run within an AWS VPC for enterprise security/compliance.
 """
@@ -68,9 +68,9 @@ openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # Deepgram API key for cloud fallback
 deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
 if not deepgram_api_key:
-    print("⚠️  WARNING: DEEPGRAM_API_KEY not set")
+    print("WARNING: DEEPGRAM_API_KEY not set")
 else:
-    print(f"✅ Deepgram API key loaded: {deepgram_api_key[:8]}...")
+    print(f"Deepgram API key loaded: {deepgram_api_key[:8]}...")
 
 # -----------------------------------------------------------------------------
 # STT Client Configuration
@@ -80,7 +80,7 @@ USE_SAGEMAKER_STT = os.getenv("USE_SAGEMAKER_STT", "false").lower() == "true"
 
 if USE_SAGEMAKER_STT and SAGEMAKER_AVAILABLE:
     # SageMaker deployment - audio stays within your VPC
-    print("🔒 Using SageMaker STT endpoint (VPC-isolated)")
+    print("Using SageMaker STT endpoint (VPC-isolated)")
     stt_client = AsyncDeepgramClient(
         api_key="dummy",  # Not used for SageMaker auth
         socket_transport=sagemaker_transport(
@@ -90,7 +90,7 @@ if USE_SAGEMAKER_STT and SAGEMAKER_AVAILABLE:
     )
 else:
     # Deepgram Cloud - easiest to get started
-    print("☁️  Using Deepgram Cloud STT")
+    print("Using Deepgram Cloud STT")
     stt_client = AsyncDeepgramClient(api_key=deepgram_api_key)
 
 # -----------------------------------------------------------------------------
@@ -124,8 +124,8 @@ Your task is to help them check the status of their prescription orders.
    - RX ID: RX1001 (identifies a specific prescription)
 
 2. **Always Call Functions First**:
-   - If asked "what orders do I have?" → MUST call list_member_orders
-   - If asked "what's in the order?" → MUST call get_order_details
+   - If asked "what orders do I have?" -> MUST call list_member_orders
+   - If asked "what's in the order?" -> MUST call get_order_details
    - NEVER guess or make up data
 
 3. **Spell Out IDs**: Always spell IDs letter by letter with spaces
@@ -387,7 +387,7 @@ FUNCTION_MAP = {
 # =============================================================================
 # VOICE AGENT CLASS
 # =============================================================================
-# This class orchestrates the STT → LLM → TTS pipeline.
+# This class orchestrates the STT -> LLM -> TTS pipeline.
 # In a production system, you might use Pipecat framework for this.
 
 class VoiceAgent:
@@ -439,7 +439,7 @@ class VoiceAgent:
             
             mode = "SageMaker" if USE_SAGEMAKER_STT else "Cloud"
             await self.send_status("connected", f"STT connected ({mode})")
-            print(f"✅ STT connection established via {mode}")
+            print(f"[OK] STT connection established via {mode}")
             
         except Exception as e:
             await self.send_error(f"STT connection failed: {str(e)}")
@@ -448,7 +448,7 @@ class VoiceAgent:
             
     async def _on_stt_open(self, _):
         """Called when STT connection is established."""
-        print("🎤 STT connection opened")
+        print("[STT] Connection opened")
         
     async def _on_stt_message(self, message):
         """
@@ -467,7 +467,7 @@ class VoiceAgent:
                         .get("transcript", "")
                     )
                     
-                    print(f"📝 Transcript: '{transcript}'")
+                    print(f"[Transcript] '{transcript}'")
                     
                     # Process if we got text and aren't already processing
                     if transcript.strip() and not self.is_processing:
@@ -553,12 +553,12 @@ class VoiceAgent:
                     function_name = tool_call.function.name
                     function_args = json.loads(tool_call.function.arguments)
                     
-                    print(f"🔧 Calling function: {function_name}({function_args})")
+                    print(f"[Function] Calling: {function_name}({function_args})")
                     
                     # Execute the function
                     if function_name in FUNCTION_MAP:
                         result = FUNCTION_MAP[function_name](function_args)
-                        print(f"   Result: {result}")
+                        print(f"[Function] Result: {result}")
                         
                         # Track context for follow-up questions
                         if function_name == "verify_member_id" and result.get("found"):
@@ -615,15 +615,15 @@ class VoiceAgent:
                 
                 final_message = final_response.choices[0].message
                 
-                # Handle chained function calls (e.g., verify → list_orders)
+                # Handle chained function calls (e.g., verify -> list_orders)
                 while final_message.tool_calls:
-                    print("🔗 Chained function call")
+                    print("[Function] Chained call detected")
                     chained_results = []
                     
                     for tool_call in final_message.tool_calls:
                         function_name = tool_call.function.name
                         function_args = json.loads(tool_call.function.arguments)
-                        print(f"🔧 Calling: {function_name}({function_args})")
+                        print(f"[Function] Calling: {function_name}({function_args})")
                         
                         if function_name in FUNCTION_MAP:
                             result = FUNCTION_MAP[function_name](function_args)
@@ -686,7 +686,7 @@ class VoiceAgent:
             })
             
             # Send response text to frontend
-            print(f"🤖 Response: {assistant_text}")
+            print(f"[Response] {assistant_text}")
             await self.send_transcript(assistant_text, "assistant")
             
             # -----------------------------------------------------------------
@@ -697,7 +697,7 @@ class VoiceAgent:
             # Check for goodbye - auto disconnect
             goodbye_phrases = ["goodbye", "bye", "take care", "thank you for calling"]
             if assistant_text and any(phrase in assistant_text.lower() for phrase in goodbye_phrases):
-                print("👋 Goodbye detected - ending call")
+                print("[Call] Goodbye detected - ending call")
                 await asyncio.sleep(1.5)  # Wait for TTS to finish
                 await self.websocket.send_json({"type": "disconnect", "reason": "conversation_ended"})
                 await self.websocket.close()
@@ -718,7 +718,7 @@ class VoiceAgent:
             
         try:
             await self.send_status("speaking", "Generating response...")
-            print(f"🔊 Generating TTS for: '{text[:50]}...'")
+            print(f"[TTS] Generating audio for: '{text[:50]}...'")
             
             # Stream TTS audio chunks
             audio_chunks = []
@@ -735,7 +735,7 @@ class VoiceAgent:
             if audio_chunks:
                 audio_data = b''.join(audio_chunks)
                 duration = len(audio_data) / 32000  # 16-bit @ 16kHz = 32k bytes/sec
-                print(f"   Audio: {len(audio_data)} bytes ({duration:.1f}s)")
+                print(f"[TTS] Audio: {len(audio_data)} bytes ({duration:.1f}s)")
                 
                 # Base64 encode for JSON transport
                 audio_b64 = base64.b64encode(audio_data).decode('utf-8')
@@ -791,7 +791,7 @@ class VoiceAgent:
             "type": "error",
             "message": error
         })
-        print(f"❌ ERROR: {error}")
+        print(f"[ERROR] {error}")
         
     async def stop_stt(self):
         """Close STT connection."""
@@ -833,7 +833,7 @@ async def voice_websocket(websocket: WebSocket):
     - Server sends JSON: {"type": "transcript"|"status"|"audio"|"error"}
     """
     await websocket.accept()
-    print("🔌 Client connected")
+    print("[WebSocket] Client connected")
     
     agent = VoiceAgent(websocket)
     
@@ -864,12 +864,12 @@ async def voice_websocket(websocket: WebSocket):
                     agent.current_member_id = None
                     agent.current_order_id = None
                     await agent.send_status("ready", "Conversation reset")
-                    print("🔄 Conversation reset")
+                    print("[WebSocket] Conversation reset")
                     
     except WebSocketDisconnect:
-        print("🔌 Client disconnected")
+        print("[WebSocket] Client disconnected")
     except Exception as e:
-        print(f"❌ WebSocket error: {e}")
+        print(f"[ERROR] WebSocket error: {e}")
         import traceback
         traceback.print_exc()
     finally:
@@ -883,16 +883,15 @@ async def voice_websocket(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
     print("""
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║       Pipecat + Deepgram Voice Agent Demo                     ║
-    ║                                                               ║
-    ║   STT: Deepgram Nova-3 {"(SageMaker)" if USE_SAGEMAKER_STT else "(Cloud)"}
-    ║   LLM: OpenAI GPT-4o-mini                                     ║
-    ║   TTS: Deepgram Aura                                          ║
-    ║                                                               ║
-    ║   Server: http://localhost:8000                               ║
-    ║   WebSocket: ws://localhost:8000/ws/voice                     ║
-    ╚═══════════════════════════════════════════════════════════════╝
+    ================================================================
+           Pipecat + Deepgram Voice Agent Demo                     
+                                                                   
+       STT: Deepgram Nova-3 (SageMaker or Cloud)
+       LLM: OpenAI GPT-4o-mini                                     
+       TTS: Deepgram Aura                                          
+                                                                   
+       Server: http://localhost:8000                               
+       WebSocket: ws://localhost:8000/ws/voice                     
+    ================================================================
     """)
     uvicorn.run(app, host="0.0.0.0", port=8000)
-

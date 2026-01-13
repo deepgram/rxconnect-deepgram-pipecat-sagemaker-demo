@@ -1,19 +1,19 @@
-# 🎙️ Pipecat + Deepgram Voice Agent Demo
+# Pipecat + Deepgram Voice Agent Demo
 
 A production-ready voice AI agent demonstrating real-time conversational AI using **Deepgram** for speech processing on **AWS SageMaker**, **Amazon Bedrock** for LLM, and **Pipecat** for orchestration — all running securely within an **AWS VPC**.
 
 ![Architecture Diagram](docs/architecture.png)
 
-## 🎬 Demo Video
+## Demo Video
 
 To show what this unlocks in a real workflow, this demo showcases a **pharmacy voice agent** built on Deepgram and running on SageMaker.
 
 In the demo, the agent handles an **end-to-end customer inquiry**:
-1. ✅ Authenticating a caller with a Member ID
-2. ✅ Pulling the correct order
-3. ✅ Identifying the medication
-4. ✅ Checking refill availability
-5. ✅ Giving a precise pickup time
+1. Authenticating a caller with a Member ID
+2. Pulling the correct order
+3. Identifying the medication
+4. Checking refill availability
+5. Giving a precise pickup time
 
 Each step is powered by **real-time streaming STT, TTS, and agent logic running natively on SageMaker**, so the interaction feels natural and responsive while retrieving accurate, structured data from backend systems.
 
@@ -21,7 +21,7 @@ Each step is powered by **real-time streaming STT, TTS, and agent logic running 
 
 ---
 
-## 🏗️ How the Demo Works
+## How the Demo Works
 
 ![Architecture](docs/architecture.png)
 
@@ -29,12 +29,12 @@ The diagram illustrates the workflow behind the pharmacy demo:
 
 | Step | Component | Description |
 |------|-----------|-------------|
-| 1️⃣ | **Input Audio** | User speaks into microphone |
-| 2️⃣ | **Deepgram STT** | Audio streams to Deepgram via SageMaker Bidirectional Streaming API |
-| 3️⃣ | **LLM (Bedrock)** | Transcript passed to Amazon Bedrock with pharmacy data context |
-| 4️⃣ | **Database** | LLM queries Rx database for orders, medications, refills |
-| 5️⃣ | **Deepgram TTS** | Response synthesized via SageMaker Bidirectional Streaming API |
-| 6️⃣ | **Output Audio** | Natural speech played to user |
+| 1 | **Input Audio** | User speaks into microphone |
+| 2 | **Deepgram STT** | Audio streams to Deepgram via SageMaker Bidirectional Streaming API |
+| 3 | **LLM (Bedrock)** | Transcript passed to Amazon Bedrock with pharmacy data context |
+| 4 | **Database** | LLM queries Rx database for orders, medications, refills |
+| 5 | **Deepgram TTS** | Response synthesized via SageMaker Bidirectional Streaming API |
+| 6 | **Output Audio** | Natural speech played to user |
 
 **Pipecat** provides the orchestration layer that manages each step of the pipeline, making it easy to coordinate audio streaming, model calls, and database lookups inside an AWS VPC.
 
@@ -42,25 +42,25 @@ The result is a **fully synchronous, low-latency voice interaction** that feels 
 
 ---
 
-## 💡 What This Means for You
+## What This Means for You
 
 The applications are pretty much everywhere you'd expect:
 
-### 📞 Contact Centers
+### Contact Centers
 Real-time sentiment analysis and live agent coaching without infrastructure complexity.
 
-### 🤖 Conversational AI
+### Conversational AI
 More responsive applications that handle natural, flowing conversations users actually want to have.
 
-### 📊 Analytics Teams
+### Analytics Teams
 Process voice data as it comes in rather than waiting for batch jobs to complete.
 
-### 🔒 Compliance Teams
+### Compliance Teams
 All the benefits of AWS's security model without worrying about data leaving your VPC for external speech processing.
 
 ---
 
-## 🎯 What You'll Learn
+## What You'll Learn
 
 This demo teaches you how to build enterprise-grade voice AI applications:
 
@@ -72,7 +72,7 @@ This demo teaches you how to build enterprise-grade voice AI applications:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 pipecat-deepgram-demo/
@@ -103,7 +103,7 @@ pipecat-deepgram-demo/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -186,42 +186,42 @@ The frontend will be available at `http://localhost:3000`
 
 ---
 
-## 💬 Sample Conversation
+## Sample Conversation
 
 ```
-🤖 Agent: "Hi! You're speaking with our virtual pharmacy assistant. 
-          How may I assist you?"
+Agent: "Hi! You're speaking with our virtual pharmacy assistant. 
+       How may I assist you?"
 
-👤 You:   "I'd like to check on my prescription order"
+You:   "I'd like to check on my prescription order"
 
-🤖 Agent: "Of course! Could you please provide your member ID?"
+Agent: "Of course! Could you please provide your member ID?"
 
-👤 You:   "M 1 0 0 1"
+You:   "M 1 0 0 1"
 
-🤖 Agent: "Thank you. You have one order: O R D 0 0 1, currently processing."
+Agent: "Thank you. You have one order: O R D 0 0 1, currently processing."
 
-👤 You:   "What medication is in it?"
+You:   "What medication is in it?"
 
-🤖 Agent: "Amoxicillin 500mg, 21 pills."
+Agent: "Amoxicillin 500mg, 21 pills."
 
-👤 You:   "When will it be ready?"
+You:   "When will it be ready?"
 
-🤖 Agent: "Your order should be ready for pickup on December 20th at 10 AM."
+Agent: "Your order should be ready for pickup on December 20th at 10 AM."
 
-👤 You:   "Do I have any refills?"
+You:   "Do I have any refills?"
 
-🤖 Agent: "You have 0 refills remaining for R X 1 0 0 1."
+Agent: "You have 0 refills remaining for R X 1 0 0 1."
 
-👤 You:   "Thank you, goodbye"
+You:   "Thank you, goodbye"
 
-🤖 Agent: "Thank you for calling. Goodbye."
+Agent: "Thank you for calling. Goodbye."
 ```
 
 ---
 
-## 📚 Key Technical Concepts
+## Key Technical Concepts
 
-### 🎤 Deepgram STT via SageMaker Bidirectional Streaming
+### Deepgram STT via SageMaker Bidirectional Streaming
 
 The new SageMaker Bidirectional Streaming API enables real-time transcription within your VPC:
 
@@ -252,12 +252,12 @@ await connection.send_media(audio_chunk)
 ```
 
 **Why SageMaker?**
-- 🔒 Data stays within your AWS VPC
-- 🚫 No audio leaves your secure environment  
-- ⚡ Same Deepgram quality and latency
-- ✅ Enterprise compliance ready (HIPAA, SOC2)
+- Data stays within your AWS VPC
+- No audio leaves your secure environment  
+- Same Deepgram quality and latency
+- Enterprise compliance ready (HIPAA, SOC2)
 
-### 🧠 LLM with Amazon Bedrock + Function Calling
+### LLM with Amazon Bedrock + Function Calling
 
 The LLM uses function calling to interact with the pharmacy database:
 
@@ -298,7 +298,7 @@ response = await llm.chat.completions.create(
 )
 ```
 
-### 🔊 Deepgram TTS via SageMaker
+### Deepgram TTS via SageMaker
 
 Generate natural speech within your VPC:
 
@@ -321,7 +321,7 @@ async for chunk in tts_client.speak.v1.audio.generate(
 | `aura-2-luna-en` | Friendly, conversational |
 | `aura-2-orion-en` | Confident, authoritative |
 
-### 🔧 Pipecat Orchestration Layer
+### Pipecat Orchestration Layer
 
 Pipecat manages the entire voice pipeline, coordinating:
 - Audio streaming between components
@@ -343,7 +343,7 @@ pipeline = Pipeline([
 
 ---
 
-## 🎯 Pharmacy Agent Functions
+## Pharmacy Agent Functions
 
 | Function | Purpose | Example Response |
 |----------|---------|------------------|
@@ -355,7 +355,7 @@ pipeline = Pipeline([
 
 ---
 
-## 🛡️ Security & Compliance
+## Security & Compliance
 
 Running Deepgram on SageMaker provides enterprise-grade security:
 
@@ -370,7 +370,7 @@ Running Deepgram on SageMaker provides enterprise-grade security:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### SageMaker Connection Failed
 ```
@@ -392,11 +392,11 @@ Error: Could not connect to SageMaker endpoint
 
 ---
 
-## 📄 License
+## License
 
 MIT License - Use this for learning and building your own voice agents!
 
-## 🔗 Resources
+## Resources
 
 - [Deepgram Documentation](https://developers.deepgram.com)
 - [Deepgram on AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=deepgram)
@@ -406,4 +406,4 @@ MIT License - Use this for learning and building your own voice agents!
 
 ---
 
-**Built with ❤️ by [Deepgram](https://deepgram.com)**
+**Built with Deepgram** - [deepgram.com](https://deepgram.com)
