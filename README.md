@@ -17,7 +17,7 @@ In the demo, the agent handles an **end-to-end customer inquiry**:
 
 Each step is powered by **real-time streaming STT, TTS, and agent logic running natively on SageMaker**, so the interaction feels natural and responsive while retrieving accurate, structured data from backend systems.
 
-[![Pharmacy Voice Agent Demo](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://youtube.com/watch?v=VIDEO_ID)
+[![Pharmacy Voice Agent Demo](https://img.youtube.com/vi/_Bm-nusSqHs/maxresdefault.jpg)](https://www.youtube.com/watch?v=_Bm-nusSqHs)
 
 ---
 
