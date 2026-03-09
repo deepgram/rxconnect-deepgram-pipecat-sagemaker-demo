@@ -1,0 +1,14 @@
+.git
+extra/
+deploy/
+docs/
+*.md
+*.dmg
+*.drawio
+report.txt
+client/node_modules/.cache/
+server/venv/
+server/config/.env
+__pycache__/
+*.pyc
+.DS_Store
