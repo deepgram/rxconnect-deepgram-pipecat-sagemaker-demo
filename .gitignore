@@ -11,6 +11,9 @@ __pycache__/
 # Environment variables
 server/config/.env
 
+# Security docs (keep local only)
+SECURITY_REMEDIATION_PLAN.md
+
 # Node
 client/node_modules/
 client/.next/
