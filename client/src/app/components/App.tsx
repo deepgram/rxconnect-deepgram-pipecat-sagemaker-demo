@@ -17,7 +17,7 @@ export const App = () => {
     disconnect,
     toggleMute,
     resetConversation,
-  } = useVoiceConnection('ws://localhost:8000/ws/voice');
+  } = useVoiceConnection();
 
   return (
     <div className="flex flex-col w-full h-dvh" style={{ 

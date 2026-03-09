@@ -4,19 +4,23 @@ Handles: STT (Deepgram / SageMaker) → LLM (OpenAI with Function Calling) → T
 """
 
 import asyncio
+import hashlib
+import hmac
 import json
 import os
 import base64
+import secrets
+import time
 import uuid
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
-load_dotenv(Path(__file__).parent / "config" / ".env")
+load_dotenv(Path(__file__).parent / "config" / ".env", override=False)
 
 from config import (
     STT_CONFIG,
@@ -37,13 +41,48 @@ from deepgram.core.events import EventType
 
 app = FastAPI(title="RxConnect Voice Agent API")
 
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+# ---------------------------------------------------------------------------
+# WebSocket auth tokens
+# ---------------------------------------------------------------------------
+WS_TOKEN_SECRET = os.getenv("WS_TOKEN_SECRET", secrets.token_hex(32))
+WS_TOKEN_TTL = int(os.getenv("WS_TOKEN_TTL", "60"))
+
+
+def _create_ws_token() -> str:
+    expires = int(time.time()) + WS_TOKEN_TTL
+    nonce = secrets.token_hex(8)
+    payload = f"{expires}:{nonce}"
+    sig = hmac.new(WS_TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return f"{payload}:{sig}"
+
+
+def _verify_ws_token(token: str) -> bool:
+    try:
+        parts = token.split(":")
+        if len(parts) != 3:
+            return False
+        expires_str, nonce, sig = parts
+        if int(expires_str) < int(time.time()):
+            return False
+        expected = hmac.new(
+            WS_TOKEN_SECRET.encode(), f"{expires_str}:{nonce}".encode(), hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(sig, expected)
+    except Exception:
+        return False
+
 
 # ---------------------------------------------------------------------------
 # Clients
@@ -605,6 +644,11 @@ async def root():
     return {"message": "RxConnect Voice Agent API", "status": "running"}
 
 
+@app.get("/api/pharmacy-data")
+async def pharmacy_data():
+    return load_pharmacy_data()
+
+
 @app.get("/health")
 async def health():
     return {
@@ -614,8 +658,17 @@ async def health():
     }
 
 
+@app.post("/api/token")
+async def issue_ws_token():
+    return {"token": _create_ws_token()}
+
+
 @app.websocket("/ws/voice")
-async def voice_websocket(websocket: WebSocket):
+async def voice_websocket(websocket: WebSocket, token: str = Query("")):
+    if not _verify_ws_token(token):
+        await websocket.close(code=4401, reason="Invalid or expired token")
+        return
+
     session_id = uuid.uuid4().hex[:8]
 
     if len(active_sessions) >= MAX_CONCURRENT_SESSIONS:

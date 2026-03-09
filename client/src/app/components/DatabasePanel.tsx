@@ -37,7 +37,7 @@ export const DatabasePanel = () => {
 
     const loadData = async () => {
       try {
-        const response = await fetch('/pharmacy-order-data.json');
+        const response = await fetch('/api/pharmacy-data');
         const data = await response.json();
         
         if (isMounted) {

@@ -18,7 +18,29 @@ export interface VoiceConnectionState {
   error: string | null;
 }
 
-export function useVoiceConnection(wsUrl: string = 'ws://localhost:8000/ws/voice') {
+function getBaseUrl(): { ws: string; http: string } {
+  if (typeof window === 'undefined') {
+    return { ws: 'ws://localhost:8000', http: '' };
+  }
+  const host = window.location.host;
+  if (host.includes('localhost') || host.includes('127.0.0.1')) {
+    return { ws: 'ws://localhost:8000', http: '' };
+  }
+  const wProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return { ws: `${wProto}//${host}`, http: '' };
+}
+
+async function fetchWsToken(httpBase: string): Promise<string> {
+  const res = await fetch(`${httpBase}/api/token`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Token request failed: ${res.status}`);
+  const data = await res.json();
+  return data.token;
+}
+
+export function useVoiceConnection(wsUrl?: string) {
+  const baseUrls = getBaseUrl();
+  const wsBase = wsUrl ?? baseUrls.ws;
+  const httpBase = baseUrls.http;
   const [state, setState] = useState<VoiceConnectionState>({
     isConnected: false,
     isListening: false,
@@ -138,7 +160,8 @@ export function useVoiceConnection(wsUrl: string = 'ws://localhost:8000/ws/voice
     try {
       setState(prev => ({ ...prev, status: 'Connecting...', error: null }));
 
-      const ws = new WebSocket(wsUrl);
+      const token = await fetchWsToken(httpBase);
+      const ws = new WebSocket(`${wsBase}/ws/voice?token=${encodeURIComponent(token)}`);
       wsRef.current = ws;
 
       ws.onopen = async () => {
@@ -210,7 +233,7 @@ export function useVoiceConnection(wsUrl: string = 'ws://localhost:8000/ws/voice
         status: 'Error',
       }));
     }
-  }, [wsUrl, addMessage, playAudio, startMicrophone, stopMicrophone]);
+  }, [wsBase, httpBase, addMessage, playAudio, startMicrophone, stopMicrophone]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
