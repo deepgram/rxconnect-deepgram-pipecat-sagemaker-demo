@@ -6,6 +6,6 @@ deepgram-sdk==6.0.1
 websockets==15.0.1
 deepgram-sagemaker==0.2.0
 boto3==1.42.13
-aiohttp==3.11.18
+aiohttp==3.13.3
 loguru
 pipecat-ai[deepgram,openai,websocket,silero]
