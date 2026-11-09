@@ -21,20 +21,20 @@ export const App = () => {
 
   return (
     <div className="flex flex-col w-full h-dvh" style={{ 
-      background: 'linear-gradient(135deg, #0a0a0a 0%, #18181b 100%)'
+      background: 'var(--surface-canvas)'
     }}>
       {/* Header */}
       <div className="flex items-center justify-between gap-6 px-10 py-5" style={{ 
-        background: 'linear-gradient(180deg, #000000 0%, #0a0a0a 100%)',
-        borderBottom: '1px solid rgba(113, 113, 122, 0.2)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+        background: 'var(--surface-default)',
+        borderBottom: '1px solid var(--border-default)',
+        boxShadow: 'none'
       }}>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-xl font-bold text-white tracking-tight">
+            <h1 className="text-[28px] leading-none font-semibold text-[color:var(--text-primary)]">
               RxConnect
             </h1>
-            <p className="text-xs" style={{ color: '#71717a' }}>
+            <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
               Real-time voice assistant for prescription management
             </p>
           </div>
@@ -47,21 +47,21 @@ export const App = () => {
               className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
               style={{
                 background: isMuted 
-                  ? 'rgba(239, 68, 68, 0.2)' 
-                  : 'rgba(59, 130, 246, 0.15)',
-                border: isMuted 
-                  ? '2px solid rgba(239, 68, 68, 0.5)' 
-                  : '2px solid rgba(59, 130, 246, 0.4)',
-                boxShadow: isListening && !isMuted
-                  ? '0 0 20px rgba(59, 130, 246, 0.3)' 
-                  : 'none',
+                  ? 'color-mix(in srgb, var(--status-error) 15%, transparent)' 
+                  : 'var(--surface-glass)',
+                border: 'none',
+                boxShadow: isMuted
+                  ? 'inset 0 0 0 1px var(--text-error)'
+                  : isListening
+                    ? 'inset 0 0 0 1px var(--accent)'
+                    : 'inset 0 0 0 1px var(--border-default)',
               }}
               title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
             >
               {isMuted ? (
                 <svg 
                   className="w-5 h-5" 
-                  style={{ color: '#ef4444' }} 
+                  style={{ color: 'var(--text-error)' }} 
                   fill="currentColor" 
                   viewBox="0 0 24 24"
                 >
@@ -70,7 +70,7 @@ export const App = () => {
               ) : (
                 <svg 
                   className="w-5 h-5" 
-                  style={{ color: '#3b82f6' }} 
+                  style={{ color: 'var(--accent-text)' }} 
                   fill="currentColor" 
                   viewBox="0 0 24 24"
                 >
@@ -82,15 +82,12 @@ export const App = () => {
 
           <button
             onClick={isConnected ? disconnect : connect}
-            className="px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+            className="min-h-[40px] px-5 rounded-full font-mono font-medium text-sm transition-all duration-200"
             style={{
-              background: isConnected 
-                ? 'rgba(168, 146, 255, 0.15)' 
-                : 'rgba(39, 39, 42, 0.5)',
-              border: isConnected 
-                ? '1px solid rgba(168, 146, 255, 0.4)' 
-                : '1px solid rgba(113, 113, 122, 0.2)',
-              color: isConnected ? '#A892FF' : '#ffffff',
+              background: isConnected ? 'var(--surface-glass)' : 'var(--accent)',
+              border: 'none',
+              boxShadow: isConnected ? 'inset 0 0 0 1px var(--border-default)' : 'none',
+              color: isConnected ? 'var(--text-primary)' : 'var(--text-on-accent)',
             }}
           >
             {isConnected ? 'Disconnect' : 'Connect'}
@@ -99,14 +96,15 @@ export const App = () => {
           {isConnected && messages.length > 0 && (
             <button
               onClick={resetConversation}
-              className="p-2.5 rounded-lg transition-all duration-200"
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
               style={{
-                background: 'rgba(39, 39, 42, 0.5)',
-                border: '1px solid rgba(113, 113, 122, 0.2)',
+                background: 'var(--surface-glass)',
+                border: 'none',
+                boxShadow: 'inset 0 0 0 1px var(--border-default)',
               }}
               title="Reset conversation"
             >
-              <svg className="w-4 h-4" style={{ color: '#71717a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
             </button>
@@ -115,8 +113,8 @@ export const App = () => {
       </div>
 
       {error && (
-        <div className="px-10 py-3" style={{ background: 'rgba(239, 68, 68, 0.1)', borderBottom: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="px-10 py-3" style={{ background: 'color-mix(in srgb, var(--status-error) 10%, transparent)', borderBottom: '1px solid color-mix(in srgb, var(--status-error) 20%, transparent)' }}>
+          <p className="text-sm text-[color:var(--text-error)]">{error}</p>
         </div>
       )}
 
@@ -124,16 +122,16 @@ export const App = () => {
         <div className="h-full overflow-hidden rounded-lg" style={{ 
           width: '50%',
           minWidth: '780px',
-          border: '1px solid rgba(113, 113, 122, 0.2)',
-          background: '#000000'
+          border: '1px solid var(--border-default)',
+          background: 'var(--surface-default)'
         }}>
           <DatabasePanel />
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden gap-4">
           <div className="flex-1 overflow-hidden rounded-lg" style={{
-            background: '#18181b',
-            border: '1px solid rgba(113, 113, 122, 0.2)'
+            background: 'var(--surface-card)',
+            border: '1px solid var(--border-default)'
           }}>
             <ConversationPanel 
               messages={messages} 
@@ -144,22 +142,22 @@ export const App = () => {
           </div>
 
           <div className="px-6 py-4 rounded-lg" style={{
-            background: 'linear-gradient(135deg, #18181b 0%, #27272a 100%)',
-            border: '1px solid rgba(217, 70, 239, 0.2)',
-            boxShadow: '0 0 20px rgba(217, 70, 239, 0.1)'
+            background: 'var(--surface-card)',
+            border: '1px solid var(--border-default)',
+            boxShadow: 'none'
           }}>
             <div className="flex items-center gap-4">
               <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{
-                background: 'rgba(217, 70, 239, 0.1)',
-                border: '1px solid rgba(217, 70, 239, 0.3)'
+                background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)'
               }}>
                 <span className="text-lg">💡</span>
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium mb-1" style={{ color: '#d946ef' }}>
+                <p className="text-xs font-mono font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--accent-text)' }}>
                   Quick Tip
                 </p>
-                <p className="text-sm" style={{ color: '#e4e4e7' }}>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   Click &quot;Connect&quot; to start talking with the assistant. Use the database panel to find Member IDs and Order IDs for testing.
                 </p>
               </div>
@@ -169,8 +167,8 @@ export const App = () => {
       </div>
 
       <div className="px-8 py-10" style={{ 
-        background: '#000000',
-        borderTop: '1px solid rgba(113, 113, 122, 0.1)'
+        background: 'var(--surface-canvas)',
+        borderTop: '1px solid var(--border-default)'
       }}>
         <div className="flex items-center justify-center gap-8" style={{ minHeight: '40px' }}>
           <a 
@@ -180,16 +178,16 @@ export const App = () => {
             className="transition-all hover:scale-105 flex items-center"
           >
             <Image 
-              src="/deepgram.svg" 
+              src="/deepgram-2026.svg" 
               alt="Deepgram" 
-              width={125}
-              height={32}
+              width={126}
+              height={24}
               className="object-contain"
-              style={{ height: '32px', display: 'block' }}
+              style={{ height: '24px', width: 'auto', display: 'block' }}
               priority
             />
           </a>
-          <span className="text-2xl font-light flex items-center" style={{ color: '#71717a' }}>×</span>
+          <span className="text-2xl font-light flex items-center" style={{ color: 'var(--text-tertiary)' }}>×</span>
           <a 
             href="https://pipecat.ai" 
             target="_blank" 
@@ -202,11 +200,11 @@ export const App = () => {
               width={140}
               height={32}
               className="object-contain"
-              style={{ height: '32px', display: 'block' }}
+              style={{ height: '32px', display: 'block', mixBlendMode: 'lighten' }}
               priority
             />
           </a>
-          <span className="text-2xl font-light flex items-center" style={{ color: '#71717a' }}>×</span>
+          <span className="text-2xl font-light flex items-center" style={{ color: 'var(--text-tertiary)' }}>×</span>
           <a 
             href="https://aws.amazon.com/sagemaker/" 
             target="_blank" 

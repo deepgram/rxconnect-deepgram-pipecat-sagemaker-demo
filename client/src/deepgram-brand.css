@@ -1,0 +1,325 @@
+/*
+ * Deepgram 2026 brand layer for apps built on @deepgram/styles.
+ *
+ * Load this AFTER deepgram.css. It is unlayered, so it wins over the package's
+ * @layer rules without needing !important.
+ *
+ * Token values were read from the stylesheets served by workshops.deepgram.com
+ * and community.deepgram.com on 2026-11-03. See references/tokens.md.
+ *
+ * Dark mode: follows the OS, or the classes `is-dark` / `is-light` on <html>, or an app's own
+ * toggle when it uses one of: .dark .dark-mode .theme-dark [data-theme="dark"] on <html> or <body>.
+ * An app with its own toggle should also carry `is-light` on <html> so the OS setting does not
+ * fight the toggle. The alias block below is re-declared on the same selectors because a var()
+ * inside a custom property resolves where it is declared, not where it is used.
+ *
+ * Fonts: Work Sans and Azeret Mono are OFL and loaded from Google Fonts by the
+ * skill's apply step. Perfektta is licensed and is NOT bundled; --font-display
+ * falls back to Work Sans when the app has no licensed copy.
+ */
+
+:root {
+  --font-display: "Perfektta", "Work Sans", system-ui, sans-serif;
+  --font-sans: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Azeret Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --dg-fuchsia: #e042ff;
+  --dg-brass: #f7f300;
+  --dg-off-white: #fcfaf8;
+  --dg-ink: #1d1d1d;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  /* light */
+  --surface-canvas: #fcfaf8;
+  --surface-default: #f7f4f1;
+  --surface-raised: #f2efed;
+  --surface-overlay: #ffffff;
+  --surface-card: #ffffff;
+  --surface-subtle: #f2efed;
+  --surface-inverse: #0a0a0a;
+  --surface-glass: rgba(10, 10, 10, 0.04);
+  --surface-glass-hover: rgba(10, 10, 10, 0.08);
+  --surface-selected: rgba(224, 66, 255, 0.1);
+
+  --text-primary: #1d1d1d;
+  --text-secondary: #242424;
+  --text-tertiary: #5f5e5e;
+  --text-link: #0172c4;
+  --text-link-on-tint: #0169b6;
+  --text-on-accent: #1d1d1d;
+  --text-inverse: #fcfaf8;
+  --text-success: #3b7815;
+  --text-error: #b43f36;
+
+  --border-subtle: #dcd8d5;
+  --border-default: #beb9b6;
+  --border-hover: #5f5e5e;
+
+  --accent: #e042ff;
+  --accent-hover: #e358fe;
+  --accent-active: #d03fed;
+  --accent-text: var(--text-primary);
+  --accent-ring: #c232e0;
+  --focus: #e042ff;
+  --focus-edge: #1d1d1d;
+
+  --status-success: #5bba21;
+  --status-error: #db292d;
+
+  --code-bg: #f2efed;
+  --code-fg: #242424;
+  --code-comment: #6e6b69;
+  --code-keyword: #6a3bd6;
+  --code-string: #3b7815;
+  --code-number: #a04e00;
+  --code-fn: #0169b6;
+  --code-prop: #6b6900;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.is-light) {
+    --surface-canvas: #0a0a0a;
+    --surface-default: #141414;
+    --surface-raised: #1d1d1d;
+    --surface-overlay: #242424;
+    --surface-card: #141414;
+    --surface-subtle: #242424;
+    --surface-inverse: #fcfaf8;
+    --surface-glass: rgba(255, 255, 255, 0.05);
+    --surface-glass-hover: rgba(255, 255, 255, 0.1);
+    --surface-selected: rgba(255, 255, 255, 0.1);
+
+    --text-primary: #fcfaf8;
+    --text-secondary: #cccccc;
+    --text-tertiary: #989898;
+    --text-link: #00b2ff;
+    --text-link-on-tint: #00b2ff;
+    --text-inverse: #1d1d1d;
+    --text-success: #5bba21;
+    --text-error: #ef585a;
+
+    --border-subtle: #242424;
+    --border-default: #2d2d2d;
+
+    --accent-text: #e042ff;
+    --accent-ring: #e042ff;
+    --focus-edge: transparent;
+
+    --code-bg: #141414;
+    --code-fg: #cccccc;
+    --code-comment: #858585;
+    --code-keyword: #a26ffd;
+    --code-string: #86eb47;
+    --code-number: #fa8100;
+    --code-fn: #00b2ff;
+    --code-prop: #f7f300;
+
+    color-scheme: dark;
+  }
+}
+
+:root.is-dark,
+:root.dark,
+:root[data-theme="dark"],
+:root[data-bs-theme="dark"],
+body.dark-mode,
+body.dark,
+body.theme-dark,
+body[data-theme="dark"] {
+  --surface-canvas: #0a0a0a;
+  --surface-default: #141414;
+  --surface-raised: #1d1d1d;
+  --surface-overlay: #242424;
+  --surface-card: #141414;
+  --surface-subtle: #242424;
+  --surface-inverse: #fcfaf8;
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --surface-glass-hover: rgba(255, 255, 255, 0.1);
+  --surface-selected: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #fcfaf8;
+  --text-secondary: #cccccc;
+  --text-tertiary: #989898;
+  --text-link: #00b2ff;
+  --text-link-on-tint: #00b2ff;
+  --text-inverse: #1d1d1d;
+  --text-success: #5bba21;
+  --text-error: #ef585a;
+
+  --border-subtle: #242424;
+  --border-default: #2d2d2d;
+
+  --accent-text: #e042ff;
+  --accent-ring: #e042ff;
+  --focus-edge: transparent;
+
+  --code-bg: #141414;
+  --code-fg: #cccccc;
+  --code-comment: #858585;
+  --code-keyword: #a26ffd;
+  --code-string: #86eb47;
+  --code-number: #fa8100;
+  --code-fn: #00b2ff;
+  --code-prop: #f7f300;
+
+  color-scheme: dark;
+}
+
+/*
+ * Map the new tokens onto both legacy namespaces:
+ *   --color-dg-*  defined by @deepgram/styles as light-dark() pairs
+ *   --dg-*        used by the starter apps, defined nowhere, so they resolve
+ *                 to the hex fallback written beside each var() call
+ *
+ * --dg-primary and --dg-secondary use --accent-text, not --accent. The starters
+ * use them for text and thin borders as well as fills, and fuchsia text on the
+ * light canvas fails contrast. Fills are handled explicitly on .dg-btn--primary.
+ *
+ * --color-dg-warning is left to the package: the public sites do not expose a
+ * warning token to copy.
+ */
+:root,
+body.dark-mode,
+body.dark,
+body.theme-dark,
+body[data-theme="dark"] {
+  --dg-primary: var(--accent-text);
+  --dg-secondary: var(--accent-text);
+
+  --color-dg-almost-black: var(--surface-canvas);
+  --color-dg-background: var(--surface-canvas);
+  --color-dg-charcoal: var(--surface-raised);
+  --color-dg-solid: var(--surface-inverse);
+  --color-dg-on-solid: var(--text-inverse);
+  --color-dg-translucent: color-mix(in srgb, var(--surface-canvas) 50%, transparent);
+  --color-dg-border: var(--border-subtle);
+  --color-dg-pebble: var(--border-default);
+  --color-dg-slate: var(--text-tertiary);
+  --color-dg-text: var(--text-primary);
+  --color-dg-fog: var(--text-secondary);
+  --color-dg-platinum: var(--text-secondary);
+  --color-dg-muted: var(--text-tertiary);
+  --color-dg-success: var(--text-success);
+  --color-dg-danger: var(--text-error);
+
+  --dg-almost-black: var(--surface-canvas);
+  --dg-background: var(--surface-canvas);
+  --dg-charcoal: var(--surface-raised);
+  --dg-border: var(--border-subtle);
+  --dg-pebble: var(--border-default);
+  --dg-slate: var(--text-tertiary);
+  --dg-text: var(--text-primary);
+  --dg-fog: var(--text-secondary);
+  --dg-platinum: var(--text-secondary);
+  --dg-muted: var(--text-tertiary);
+  --dg-danger: var(--text-error);
+  --dg-success: var(--text-success);
+
+  --font-dg-sans: var(--font-sans);
+  --font-dg-noto: var(--font-sans);
+  --font-dg-mono: var(--font-mono);
+}
+
+body {
+  background: var(--surface-canvas);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+/* Perfektta is for page titles only, and only from 28px up. */
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono);
+}
+
+/* Unclassed anchors only: classed anchors such as .dg-btn keep their own colour. */
+a:not([class]) {
+  color: var(--text-link);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px var(--surface-canvas),
+    0 0 0 5px var(--focus-edge);
+}
+
+/* Buttons: pill shape, mono label, glass fill with an inset ring. */
+.dg-btn {
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.dg-btn.dg-btn--secondary,
+.dg-btn.dg-btn--tertiary {
+  background: var(--surface-glass);
+  background-image: none;
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-default);
+  color: var(--text-primary);
+}
+
+.dg-btn.dg-btn--secondary:hover,
+.dg-btn.dg-btn--tertiary:hover {
+  background: var(--surface-glass-hover);
+}
+
+/* The one fuchsia fill. The legacy gradient border and coloured glow are removed. */
+.dg-btn.dg-btn--primary,
+.dg-action-group > .dg-btn--primary:first-child:not(:last-child),
+.dg-action-group > .dg-btn--primary:last-child:not(:first-child) {
+  background: var(--accent);
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text-on-accent);
+}
+
+.dg-btn.dg-btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.dg-btn.dg-btn--primary:active {
+  background: var(--accent-active);
+}

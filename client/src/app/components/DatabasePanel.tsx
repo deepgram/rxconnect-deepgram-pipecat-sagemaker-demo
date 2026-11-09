@@ -17,10 +17,10 @@ interface OrderData {
 }
 
 const statusConfig: Record<string, { bgColor: string; textColor: string; label: string }> = {
-  processing: { bgColor: '#F0C200', textColor: '#1C1C1E', label: 'Processing' },
-  ready_for_pickup: { bgColor: '#3BAAFF', textColor: '#ffffff', label: 'Ready for Pickup' },
-  shipped: { bgColor: '#B38FFF', textColor: '#ffffff', label: 'Shipped' },
-  delivered: { bgColor: '#3CCB77', textColor: '#ffffff', label: 'Delivered' },
+  processing: { bgColor: 'var(--dg-brass)', textColor: 'var(--text-on-accent)', label: 'Processing' },
+  ready_for_pickup: { bgColor: 'var(--text-link)', textColor: 'var(--text-on-accent)', label: 'Ready for Pickup' },
+  shipped: { bgColor: 'var(--accent)', textColor: 'var(--text-on-accent)', label: 'Shipped' },
+  delivered: { bgColor: 'var(--status-success)', textColor: 'var(--text-on-accent)', label: 'Delivered' },
 };
 
 export const DatabasePanel = () => {
@@ -83,29 +83,29 @@ export const DatabasePanel = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ background: '#0a0a0a' }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#06b6d4' }} />
+      <div className="flex items-center justify-center h-full" style={{ background: 'var(--surface-canvas)' }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--accent)' }} />
       </div>
     );
   }
 
   return (
     <div className="flex h-full" style={{ 
-      background: '#000000'
+      background: 'var(--surface-default)'
     }}>
       {/* Left Sidebar - Minimal Deepgram Style */}
       <div className="w-64 flex flex-col border-r" style={{ 
-        background: '#0a0a0a',
-        borderColor: 'rgba(113, 113, 122, 0.2)'
+        background: 'var(--surface-canvas)',
+        borderColor: 'var(--border-default)'
       }}>
         {/* Header - Data Browser floating card */}
         <div className="p-3">
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ 
-            background: '#1a1a1f',
-            border: '1px solid rgba(113, 113, 122, 0.15)'
+            background: 'var(--surface-raised)',
+            border: '1px solid var(--border-default)'
           }}>
             <svg 
-              style={{ width: '16px', height: '16px', color: '#A892FF' }} 
+              style={{ width: '16px', height: '16px', color: 'var(--accent-text)' }} 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -113,7 +113,7 @@ export const DatabasePanel = () => {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
             </svg>
-            <span className="text-sm font-medium" style={{ color: '#ffffff' }}>
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Data Browser
             </span>
           </div>
@@ -130,12 +130,12 @@ export const DatabasePanel = () => {
                 className="cursor-pointer transition-all duration-150 rounded-md"
                 style={{
                   padding: '10px 12px',
-                  background: activeView === 'orders' ? 'rgba(168, 146, 255, 0.08)' : 'transparent',
-                  borderLeft: activeView === 'orders' ? '2px solid #A892FF' : '2px solid transparent'
+                  background: activeView === 'orders' ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'transparent',
+                  borderLeft: activeView === 'orders' ? '2px solid var(--accent-text)' : '2px solid transparent'
                 }}
                 onMouseEnter={(e) => {
                   if (activeView !== 'orders') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.background = 'var(--surface-glass)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -149,7 +149,7 @@ export const DatabasePanel = () => {
                     style={{ 
                       width: '16px', 
                       height: '16px',
-                      color: activeView === 'orders' ? '#A892FF' : '#52525b',
+                      color: activeView === 'orders' ? 'var(--accent-text)' : 'var(--text-tertiary)',
                       flexShrink: 0
                     }} 
                     fill="none" 
@@ -160,15 +160,15 @@ export const DatabasePanel = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
                   <span className="text-sm flex-1" style={{ 
-                    color: activeView === 'orders' ? '#ffffff' : '#9ca3af',
+                    color: activeView === 'orders' ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontWeight: activeView === 'orders' ? 500 : 400
                   }}>
                     orders
                   </span>
                   <span className="text-xs tabular-nums px-1.5 py-0.5 rounded" style={{ 
-                    color: '#71717a',
+                    color: 'var(--text-tertiary)',
                     fontSize: '11px',
-                    background: 'rgba(113, 113, 122, 0.1)'
+                    background: 'var(--surface-raised)'
                   }}>
                     {orders.length}
                   </span>
@@ -181,12 +181,12 @@ export const DatabasePanel = () => {
                 className="cursor-pointer transition-all duration-150 rounded-md"
                 style={{
                   padding: '10px 12px',
-                  background: activeView === 'prescriptions' ? 'rgba(168, 146, 255, 0.08)' : 'transparent',
-                  borderLeft: activeView === 'prescriptions' ? '2px solid #A892FF' : '2px solid transparent'
+                  background: activeView === 'prescriptions' ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'transparent',
+                  borderLeft: activeView === 'prescriptions' ? '2px solid var(--accent-text)' : '2px solid transparent'
                 }}
                 onMouseEnter={(e) => {
                   if (activeView !== 'prescriptions') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.background = 'var(--surface-glass)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -200,7 +200,7 @@ export const DatabasePanel = () => {
                     style={{ 
                       width: '16px', 
                       height: '16px',
-                      color: activeView === 'prescriptions' ? '#A892FF' : '#52525b',
+                      color: activeView === 'prescriptions' ? 'var(--accent-text)' : 'var(--text-tertiary)',
                       flexShrink: 0
                     }} 
                     fill="none" 
@@ -211,15 +211,15 @@ export const DatabasePanel = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
                   </svg>
                   <span className="text-sm flex-1" style={{ 
-                    color: activeView === 'prescriptions' ? '#ffffff' : '#9ca3af',
+                    color: activeView === 'prescriptions' ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontWeight: activeView === 'prescriptions' ? 500 : 400
                   }}>
                     prescriptions
                   </span>
                   <span className="text-xs tabular-nums px-1.5 py-0.5 rounded" style={{ 
-                    color: '#71717a',
+                    color: 'var(--text-tertiary)',
                     fontSize: '11px',
-                    background: 'rgba(113, 113, 122, 0.1)'
+                    background: 'var(--surface-raised)'
                   }}>
                     {totalRx}
                   </span>
@@ -232,12 +232,12 @@ export const DatabasePanel = () => {
                 className="cursor-pointer transition-all duration-150 rounded-md"
                 style={{
                   padding: '10px 12px',
-                  background: activeView === 'members' ? 'rgba(168, 146, 255, 0.08)' : 'transparent',
-                  borderLeft: activeView === 'members' ? '2px solid #A892FF' : '2px solid transparent'
+                  background: activeView === 'members' ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'transparent',
+                  borderLeft: activeView === 'members' ? '2px solid var(--accent-text)' : '2px solid transparent'
                 }}
                 onMouseEnter={(e) => {
                   if (activeView !== 'members') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.background = 'var(--surface-glass)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -251,7 +251,7 @@ export const DatabasePanel = () => {
                     style={{ 
                       width: '16px', 
                       height: '16px',
-                      color: activeView === 'members' ? '#A892FF' : '#52525b',
+                      color: activeView === 'members' ? 'var(--accent-text)' : 'var(--text-tertiary)',
                       flexShrink: 0
                     }} 
                     fill="none" 
@@ -262,15 +262,15 @@ export const DatabasePanel = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                   </svg>
                   <span className="text-sm flex-1" style={{ 
-                    color: activeView === 'members' ? '#ffffff' : '#9ca3af',
+                    color: activeView === 'members' ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontWeight: activeView === 'members' ? 500 : 400
                   }}>
                     members
                   </span>
                   <span className="text-xs tabular-nums px-1.5 py-0.5 rounded" style={{ 
-                    color: '#71717a',
+                    color: 'var(--text-tertiary)',
                     fontSize: '11px',
-                    background: 'rgba(113, 113, 122, 0.1)'
+                    background: 'var(--surface-raised)'
                   }}>
                     {[...new Set(orders.map(o => o.member_id))].length}
                   </span>
@@ -282,11 +282,11 @@ export const DatabasePanel = () => {
 
         {/* Footer - Refined Status */}
         <div className="px-4 py-3 text-xs" style={{ 
-          borderTop: '1px solid rgba(113, 113, 122, 0.15)'
+          borderTop: '1px solid var(--border-default)'
         }}>
-          <div className="flex items-center justify-between" style={{ color: '#a0a0a0' }}>
+          <div className="flex items-center justify-between" style={{ color: 'var(--text-secondary)' }}>
             <div className="flex items-center gap-1.5">
-              <svg className="w-3 h-3" style={{ color: '#a0a0a0', opacity: 0.6 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3" style={{ color: 'var(--text-secondary)', opacity: 0.6 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <span style={{ fontSize: '11px' }}>Last sync: Just now</span>
@@ -294,14 +294,14 @@ export const DatabasePanel = () => {
             <button 
               onClick={() => window.location.reload()} 
               className="p-1 rounded transition-all duration-200"
-              style={{ color: '#a0a0a0', transform: 'scale(1)' }}
+              style={{ color: 'var(--text-secondary)', transform: 'scale(1)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#A892FF';
+                e.currentTarget.style.color = 'var(--accent-text)';
                 e.currentTarget.style.transform = 'scale(1.15)';
-                e.currentTarget.style.filter = 'drop-shadow(0 0 4px rgba(168, 146, 255, 0.5))';
+                e.currentTarget.style.filter = 'none';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#a0a0a0';
+                e.currentTarget.style.color = 'var(--text-secondary)';
                 e.currentTarget.style.transform = 'scale(1)';
                 e.currentTarget.style.filter = 'none';
               }}
@@ -316,17 +316,17 @@ export const DatabasePanel = () => {
 
       {/* Main Content - Minimal Deepgram Style */}
       <div className="flex-1 flex flex-col" style={{ 
-        background: '#0f0f12',
+        background: 'var(--surface-default)',
         minWidth: 0,
         overflow: 'hidden'
       }}>
         {/* Toolbar - Minimal */}
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold capitalize text-white">
+            <h2 className="text-base font-semibold capitalize text-[color:var(--text-primary)]">
               {activeView}
             </h2>
-            <span className="text-xs" style={{ color: '#71717a' }}>
+            <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
               {activeView === 'orders' && filteredOrders.length}
               {activeView === 'prescriptions' && totalRx}
               {activeView === 'members' && [...new Set(filteredOrders.map(o => o.member_id))].length}
@@ -335,7 +335,7 @@ export const DatabasePanel = () => {
           </div>
 
           <div className="relative">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#52525b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-tertiary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <input
@@ -343,17 +343,17 @@ export const DatabasePanel = () => {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 pl-10 text-sm text-white rounded-lg w-48 focus:outline-none transition-all"
+              className="px-4 py-2 pl-10 text-sm text-[color:var(--text-primary)] rounded-lg w-48 focus:outline-none transition-all"
               style={{ 
-                background: '#1a1a1f', 
-                border: '1px solid rgba(113, 113, 122, 0.15)',
-                caretColor: '#A892FF'
+                background: 'var(--surface-raised)', 
+                border: '1px solid var(--border-default)',
+                caretColor: 'var(--accent-text)'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'rgba(168, 146, 255, 0.4)';
+                e.target.style.borderColor = 'color-mix(in srgb, var(--accent) 40%, transparent)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(113, 113, 122, 0.15)';
+                e.target.style.borderColor = 'var(--border-default)';
               }}
             />
           </div>
@@ -362,8 +362,8 @@ export const DatabasePanel = () => {
         {/* Data Table with Scroll - Minimal */}
         <div className="flex-1 px-4 pb-4 overflow-hidden">
           <div className="rounded-lg h-full" style={{ 
-            background: '#0a0a0a',
-            border: '1px solid rgba(113, 113, 122, 0.1)',
+            background: 'var(--surface-canvas)',
+            border: '1px solid var(--border-default)',
             overflow: 'auto'
           }}>
             {activeView === 'orders' && (
@@ -375,12 +375,12 @@ export const DatabasePanel = () => {
                 WebkitOverflowScrolling: 'touch'
               }}>
                 <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse' }}>
-                  <thead style={{ background: '#000000', borderBottom: '1px solid rgba(113, 113, 122, 0.2)', position: 'sticky', top: 0, zIndex: 10 }}>
+                  <thead style={{ background: 'var(--surface-default)', borderBottom: '1px solid var(--border-default)', position: 'sticky', top: 0, zIndex: 10 }}>
                     <tr>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Order ID</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Member ID</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '140px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Prescription IDs</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '180px' }}>Status</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>Order ID</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>Member ID</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '140px', borderRight: '1px solid var(--border-subtle)' }}>Prescription IDs</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '180px' }}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -393,28 +393,28 @@ export const DatabasePanel = () => {
                           id={`order-${order.order_id}`}
                           className="cursor-pointer transition-all duration-200" 
                           style={{ 
-                            borderBottom: '1px solid rgba(113, 113, 122, 0.08)',
+                            borderBottom: '1px solid var(--border-subtle)',
                             background: isHighlighted 
-                              ? 'rgba(168, 146, 255, 0.15)' 
-                              : (orders.indexOf(order) % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)'),
+                              ? 'color-mix(in srgb, var(--accent) 15%, transparent)' 
+                              : (orders.indexOf(order) % 2 === 0 ? 'transparent' : 'var(--surface-glass)'),
                             transform: 'translateX(0)',
-                            boxShadow: isHighlighted ? '0 0 0 2px rgba(168, 146, 255, 0.3)' : 'none'
+                            boxShadow: isHighlighted ? 'inset 0 0 0 2px var(--accent)' : 'none'
                           }}
                           onClick={() => setHighlightedOrderId(null)}
                           onMouseEnter={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                              e.currentTarget.style.background = 'var(--surface-glass-hover)';
                             }
                             e.currentTarget.style.transform = 'translateX(2px)';
                           }}
                           onMouseLeave={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = orders.indexOf(order) % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)';
+                              e.currentTarget.style.background = orders.indexOf(order) % 2 === 0 ? 'transparent' : 'var(--surface-glass)';
                             }
                             e.currentTarget.style.transform = 'translateX(0)';
                           }}
                         >
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -439,7 +439,7 @@ export const DatabasePanel = () => {
                               }}
                               className="font-mono text-sm transition-all duration-200"
                               style={{ 
-                                color: '#A892FF',
+                                color: 'var(--accent-text)',
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -455,7 +455,7 @@ export const DatabasePanel = () => {
                               {order.order_id}
                             </button>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -477,7 +477,7 @@ export const DatabasePanel = () => {
                               }}
                               className="font-mono text-sm transition-all duration-200"
                               style={{ 
-                                color: '#A892FF',
+                                color: 'var(--accent-text)',
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -493,7 +493,7 @@ export const DatabasePanel = () => {
                               {order.member_id}
                             </button>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '140px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '140px', borderRight: '1px solid var(--border-subtle)' }}>
                             <div className="flex flex-wrap gap-x-2">
                               {order.prescriptions.map((p, rxIdx) => (
                                 <span key={rxIdx}>
@@ -518,7 +518,7 @@ export const DatabasePanel = () => {
                                     }}
                                     className="font-mono text-sm transition-all duration-200"
                                     style={{ 
-                                      color: '#A892FF',
+                                      color: 'var(--accent-text)',
                                       background: 'none',
                                       border: 'none',
                                       cursor: 'pointer',
@@ -533,13 +533,13 @@ export const DatabasePanel = () => {
                                   >
                                     {p.rx_id}
                                   </button>
-                                  {rxIdx < order.prescriptions.length - 1 && <span className="text-sm" style={{ color: '#a1a1aa' }}>, </span>}
+                                  {rxIdx < order.prescriptions.length - 1 && <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>, </span>}
                                 </span>
                               ))}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap" style={{ minWidth: '180px' }}>
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold" style={{ 
+                            <span className="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-medium" style={{ 
                               background: status.bgColor,
                               color: status.textColor,
                               animation: 'bounceIn 0.5s ease-out'
@@ -568,14 +568,14 @@ export const DatabasePanel = () => {
                   minWidth: '100%', 
                   borderCollapse: 'collapse'
                 }}>
-                  <thead style={{ background: '#000000', borderBottom: '1px solid rgba(113, 113, 122, 0.2)', position: 'sticky', top: 0, zIndex: 10 }}>
+                  <thead style={{ background: 'var(--surface-default)', borderBottom: '1px solid var(--border-default)', position: 'sticky', top: 0, zIndex: 10 }}>
                     <tr>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>RX ID</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '200px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Medication</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Order ID</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '80px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Refills</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '80px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Qty</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', minWidth: '150px' }}>Status</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>RX ID</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '200px', borderRight: '1px solid var(--border-subtle)' }}>Medication</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>Order ID</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '80px', borderRight: '1px solid var(--border-subtle)' }}>Refills</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '80px', borderRight: '1px solid var(--border-subtle)' }}>Qty</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', minWidth: '150px' }}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -589,34 +589,34 @@ export const DatabasePanel = () => {
                           id={`rx-${rx.rx_id}`}
                           className="transition-all duration-200" 
                           style={{ 
-                            borderBottom: '1px solid rgba(113, 113, 122, 0.08)',
+                            borderBottom: '1px solid var(--border-subtle)',
                             background: isHighlighted 
-                              ? 'rgba(168, 146, 255, 0.15)' 
-                              : (idx % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)'),
+                              ? 'color-mix(in srgb, var(--accent) 15%, transparent)' 
+                              : (idx % 2 === 0 ? 'transparent' : 'var(--surface-glass)'),
                             transform: 'translateX(0)',
-                            boxShadow: isHighlighted ? '0 0 0 2px rgba(168, 146, 255, 0.3)' : 'none'
+                            boxShadow: isHighlighted ? 'inset 0 0 0 2px var(--accent)' : 'none'
                           }}
                           onClick={() => setHighlightedRxId(null)}
                           onMouseEnter={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                              e.currentTarget.style.background = 'var(--surface-glass-hover)';
                             }
                             e.currentTarget.style.transform = 'translateX(2px)';
                           }}
                           onMouseLeave={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)';
+                              e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'var(--surface-glass)';
                             }
                             e.currentTarget.style.transform = 'translateX(0)';
                           }}
                         >
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
-                            <span className="font-mono text-sm" style={{ color: '#A892FF' }}>{rx.rx_id}</span>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>
+                            <span className="font-mono text-sm" style={{ color: 'var(--accent-text)' }}>{rx.rx_id}</span>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '200px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
-                            <span className="text-sm" style={{ color: '#a1a1aa' }}>{rx.name}</span>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '200px', borderRight: '1px solid var(--border-subtle)' }}>
+                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{rx.name}</span>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '120px', borderRight: '1px solid var(--border-subtle)' }}>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -638,7 +638,7 @@ export const DatabasePanel = () => {
                               }}
                               className="font-mono text-sm transition-all duration-200"
                               style={{ 
-                                color: '#A892FF',
+                                color: 'var(--accent-text)',
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -654,16 +654,16 @@ export const DatabasePanel = () => {
                               {rx.order_id}
                             </button>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '80px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
-                            <span className="text-sm font-medium" style={{ color: rx.refills_remaining > 0 ? '#10b981' : '#ef4444' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '80px', borderRight: '1px solid var(--border-subtle)' }}>
+                            <span className="text-sm font-medium" style={{ color: rx.refills_remaining > 0 ? 'var(--text-success)' : 'var(--text-error)' }}>
                               {rx.refills_remaining}
                             </span>
                           </td>
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '80px', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
-                            <span className="text-sm" style={{ color: '#a1a1aa' }}>{rx.quantity}</span>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ minWidth: '80px', borderRight: '1px solid var(--border-subtle)' }}>
+                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{rx.quantity}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap" style={{ minWidth: '150px' }}>
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold" style={{ 
+                            <span className="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-medium" style={{ 
                               background: status.bgColor,
                               color: status.textColor,
                               animation: 'bounceIn 0.5s ease-out'
@@ -689,11 +689,11 @@ export const DatabasePanel = () => {
                 WebkitOverflowScrolling: 'touch'
               }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead style={{ background: '#000000', borderBottom: '1px solid rgba(113, 113, 122, 0.2)', position: 'sticky', top: 0, zIndex: 10 }}>
+                  <thead style={{ background: 'var(--surface-default)', borderBottom: '1px solid var(--border-default)', position: 'sticky', top: 0, zIndex: 10 }}>
                     <tr>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', width: '33.33%', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Member ID</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', width: '33.33%', borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>Orders</th>
-                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#71717a', width: '33.33%' }}>RX IDs</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', width: '33.33%', borderRight: '1px solid var(--border-subtle)' }}>Member ID</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', width: '33.33%', borderRight: '1px solid var(--border-subtle)' }}>Orders</th>
+                      <th className="px-7 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)', width: '33.33%' }}>RX IDs</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -706,33 +706,33 @@ export const DatabasePanel = () => {
                           id={`member-${memberId}`}
                           className="transition-all duration-200" 
                           style={{ 
-                            borderBottom: '1px solid rgba(113, 113, 122, 0.08)',
+                            borderBottom: '1px solid var(--border-subtle)',
                             background: isHighlighted 
-                              ? 'rgba(168, 146, 255, 0.15)' 
-                              : (idx % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)'),
+                              ? 'color-mix(in srgb, var(--accent) 15%, transparent)' 
+                              : (idx % 2 === 0 ? 'transparent' : 'var(--surface-glass)'),
                             transform: 'translateX(0)',
-                            boxShadow: isHighlighted ? '0 0 0 2px rgba(168, 146, 255, 0.3)' : 'none'
+                            boxShadow: isHighlighted ? 'inset 0 0 0 2px var(--accent)' : 'none'
                           }}
                           onClick={() => setHighlightedMemberId(null)}
                           onMouseEnter={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                              e.currentTarget.style.background = 'var(--surface-glass-hover)';
                             }
                             e.currentTarget.style.transform = 'translateX(2px)';
                           }}
                           onMouseLeave={(e) => {
                             if (!isHighlighted) {
-                              e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'rgba(113, 113, 122, 0.02)';
+                              e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'var(--surface-glass)';
                             }
                             e.currentTarget.style.transform = 'translateX(0)';
                           }}
                         >
-                          <td className="px-7 py-4 whitespace-nowrap" style={{ borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
-                            <span className="text-sm font-mono" style={{ color: '#A892FF' }}>
+                          <td className="px-7 py-4 whitespace-nowrap" style={{ borderRight: '1px solid var(--border-subtle)' }}>
+                            <span className="text-sm font-mono" style={{ color: 'var(--accent-text)' }}>
                               {memberId}
                             </span>
                           </td>
-                          <td className="px-7 py-4" style={{ borderRight: '1px solid rgba(113, 113, 122, 0.06)' }}>
+                          <td className="px-7 py-4" style={{ borderRight: '1px solid var(--border-subtle)' }}>
                             <div className="flex flex-wrap gap-2">
                               {memberOrders.map((order, orderIdx) => (
                                 <button
@@ -759,8 +759,8 @@ export const DatabasePanel = () => {
                                   style={{
                                     padding: '0',
                                     fontSize: '12px',
-                                    fontFamily: 'monospace',
-                                    color: '#A892FF',
+                                    fontFamily: 'var(--font-mono)',
+                                    color: 'var(--accent-text)',
                                     background: 'none',
                                     border: 'none',
                                     textDecoration: 'none',
@@ -806,8 +806,8 @@ export const DatabasePanel = () => {
                                     style={{
                                       padding: '0',
                                       fontSize: '12px',
-                                      fontFamily: 'monospace',
-                                      color: '#A892FF',
+                                      fontFamily: 'var(--font-mono)',
+                                      color: 'var(--accent-text)',
                                       background: 'none',
                                       border: 'none',
                                       textDecoration: 'none',
@@ -838,9 +838,9 @@ export const DatabasePanel = () => {
 
         {/* Status Bar - Minimal */}
         <div className="h-9 flex items-center justify-between px-6 text-xs" style={{ 
-          background: '#18181b',
-          borderTop: '1px solid rgba(113, 113, 122, 0.2)',
-          color: '#71717a'
+          background: 'var(--surface-card)',
+          borderTop: '1px solid var(--border-default)',
+          color: 'var(--text-tertiary)'
         }}>
           <span>Viewing {filteredOrders.length} records</span>
           <span>Pharmacy Database v1.0</span>

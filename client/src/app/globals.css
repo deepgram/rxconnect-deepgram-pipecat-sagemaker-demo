@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Point the brand layer's font tokens at the next/font self-hosted families. */
+:root {
+  --font-sans: var(--font-work-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Perfektta", var(--font-work-sans), system-ui, sans-serif;
+  --font-mono: var(--font-azeret-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
