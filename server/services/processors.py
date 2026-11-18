@@ -25,7 +25,10 @@ import base64
 from loguru import logger
 
 from pipecat.frames.frames import (
+    BotStartedSpeakingFrame,
+    BotStoppedSpeakingFrame,
     Frame,
+    LLMMessagesAppendFrame,
     OutputAudioRawFrame,
     OutputTransportMessageFrame,
     OutputTransportMessageUrgentFrame,
@@ -42,6 +45,9 @@ from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 class UserTranscriptForwarder(FrameProcessor):
     """Forward user transcripts (from STT) to the browser as JSON.
 
+    A clicked prompt (an ``LLMMessagesAppendFrame`` from the serializer's
+    ``user-text`` message) is echoed the same way, so it shows as the caller's turn.
+
     Place this processor immediately after the STT service in the pipeline.
     """
 
@@ -51,15 +57,24 @@ class UserTranscriptForwarder(FrameProcessor):
 
         if isinstance(frame, TranscriptionFrame) and frame.text.strip():
             logger.info(f"User transcript: {frame.text}")
-            await self.push_frame(
-                OutputTransportMessageUrgentFrame(
-                    message={
-                        "type": "transcript",
-                        "text": frame.text,
-                        "speaker": "user",
-                    }
-                )
+            await self._send_user_transcript(frame.text)
+        elif isinstance(frame, LLMMessagesAppendFrame):
+            for message in frame.messages:
+                content = message.get("content")
+                if message.get("role") == "user" and isinstance(content, str) and content.strip():
+                    logger.info(f"User prompt (clicked): {content}")
+                    await self._send_user_transcript(content)
+
+    async def _send_user_transcript(self, text: str):
+        await self.push_frame(
+            OutputTransportMessageUrgentFrame(
+                message={
+                    "type": "transcript",
+                    "text": text,
+                    "speaker": "user",
+                }
             )
+        )
 
 
 class AssistantTranscriptAccumulator(FrameProcessor):
@@ -107,6 +122,13 @@ class AudioAccumulator(FrameProcessor):
     ``TTSStoppedFrame``, then emits one large frame.
 
     Place this between the TTS service and ``transport.output()``.
+
+    Because the audio goes out as a message, the output transport never plays
+    it, so it never sends the bot-speaking frames it normally would. The TTS
+    service pauses after each utterance until ``BotStoppedSpeakingFrame``
+    arrives, so this processor sends those frames upstream itself once the
+    audio has been handed off. Without them the TTS stays paused after the
+    first utterance, and only an interruption (the caller speaking) frees it.
     """
 
     def __init__(self, **kwargs):
@@ -151,6 +173,9 @@ class AudioAccumulator(FrameProcessor):
                 )
                 self._chunks = []
             await self.push_frame(frame, direction)
+            # Stand in for the transport: the utterance has been handed off
+            await self.push_frame(BotStartedSpeakingFrame(), FrameDirection.UPSTREAM)
+            await self.push_frame(BotStoppedSpeakingFrame(), FrameDirection.UPSTREAM)
             return
 
         await self.push_frame(frame, direction)

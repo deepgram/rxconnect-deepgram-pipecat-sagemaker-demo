@@ -21,11 +21,16 @@ from pipecat.frames.frames import (
     Frame,
     InputAudioRawFrame,
     InterruptionFrame,
+    LLMMessagesAppendFrame,
     OutputTransportMessageFrame,
     OutputTransportMessageUrgentFrame,
     StartFrame,
 )
 from pipecat.serializers.base_serializer import FrameSerializer
+
+
+# A clicked prompt is a short sentence; cap what the client can send
+MAX_USER_TEXT = 500
 
 
 class RxConnectFrameSerializer(FrameSerializer):
@@ -34,6 +39,7 @@ class RxConnectFrameSerializer(FrameSerializer):
     Wire format (client → server):
         binary  – raw PCM int16 mono audio at ``input_sample_rate``
         text    – JSON control messages: ``{"type":"ping"}``, ``{"type":"reset"}``
+        text    – ``{"type":"user-text","text":"…"}``: a clicked prompt, handled as if spoken
 
     Wire format (server → client):
         text    – ``{"type":"audio","data":"<b64>","sampleRate":…,"encoding":"linear16"}``
@@ -87,6 +93,15 @@ class RxConnectFrameSerializer(FrameSerializer):
                 msg_type = msg.get("type", "")
                 if msg_type == "ping":
                     return OutputTransportMessageFrame(message={"type": "pong"})
+                if msg_type == "user-text":
+                    # A prompt the caller clicked: add it to the conversation as the
+                    # caller's words and run the LLM, as if it had been spoken.
+                    text = str(msg.get("text", "")).strip()[:MAX_USER_TEXT]
+                    if text:
+                        return LLMMessagesAppendFrame(
+                            messages=[{"role": "user", "content": text}], run_llm=True
+                        )
+                    return None
                 logger.debug(f"Unhandled client text message: {msg_type}")
             except json.JSONDecodeError:
                 logger.warning("Non-JSON text message received from client")

@@ -19,6 +19,7 @@ Pipecat frames so ``FastAPIWebsocketTransport`` can drive the pipeline.
 See ``server/main_backup.py`` for the previous hand-rolled implementation.
 """
 
+import dataclasses
 import hashlib
 import hmac
 import os
@@ -70,6 +71,7 @@ from services.processors import (
 )
 from services.pharmacy import (
     load_pharmacy_data,
+    normalize_id,
     verify_member_id,
     list_member_orders,
     get_order_details,
@@ -292,13 +294,63 @@ async def _create_pipeline(
         logger.info(f"[{session_id}] end_session → {result}")
         await params.result_callback(result)
 
-    llm.register_function("verify_member_id", _on_verify_member_id)
-    llm.register_function("list_member_orders", _on_list_member_orders)
-    llm.register_function("get_order_details", _on_get_order_details)
-    llm.register_function("get_order_timing", _on_get_order_timing)
-    llm.register_function("get_order_refills", _on_get_order_refills)
-    llm.register_function("lookup_order_status", _on_lookup_order_status)
-    llm.register_function("end_session", _on_end_session)
+    # ── Messages for the browser UI ────────────────────────────────────
+    # Additive only: the tools, their results, and the prompt are unchanged.
+    #   {"type":"function-call", id, name, args, status:"running"|"completed", ms?}
+    #       → the session panel's function rows
+    #   {"type":"record-loaded", order}
+    #       → the record screen, once an order is verified for the member
+
+    async def _send_ui(message: dict):
+        await task.queue_frame(OutputTransportMessageUrgentFrame(message=message))
+
+    def _verified_order():
+        """The session's current order, only if it belongs to the verified member."""
+        order_id, member_id = session_state["order_id"], session_state["member_id"]
+        if not order_id or not member_id:
+            return None
+        return next(
+            (
+                o
+                for o in load_pharmacy_data()
+                if normalize_id(o["order_id"]) == normalize_id(order_id)
+                and normalize_id(o["member_id"]) == member_id
+            ),
+            None,
+        )
+
+    def _with_ui_messages(handler):
+        async def wrapped(params: FunctionCallParams):
+            started = time.monotonic()
+            call = {
+                "type": "function-call",
+                "id": params.tool_call_id,
+                "name": params.function_name,
+                "args": dict(params.arguments),
+            }
+            await _send_ui({**call, "status": "running"})
+            original_callback = params.result_callback
+
+            async def result_callback(result, *args, **kwargs):
+                ms = round((time.monotonic() - started) * 1000)
+                await _send_ui({**call, "status": "completed", "ms": ms})
+                order = _verified_order()
+                if order and order["order_id"] != session_state.get("shown_order_id"):
+                    session_state["shown_order_id"] = order["order_id"]
+                    await _send_ui({"type": "record-loaded", "order": order})
+                await original_callback(result, *args, **kwargs)
+
+            await handler(dataclasses.replace(params, result_callback=result_callback))
+
+        return wrapped
+
+    llm.register_function("verify_member_id", _with_ui_messages(_on_verify_member_id))
+    llm.register_function("list_member_orders", _with_ui_messages(_on_list_member_orders))
+    llm.register_function("get_order_details", _with_ui_messages(_on_get_order_details))
+    llm.register_function("get_order_timing", _with_ui_messages(_on_get_order_timing))
+    llm.register_function("get_order_refills", _with_ui_messages(_on_get_order_refills))
+    llm.register_function("lookup_order_status", _with_ui_messages(_on_lookup_order_status))
+    llm.register_function("end_session", _with_ui_messages(_on_end_session))
 
     # ── LLM context (conversation memory + tools) ─────────────────────
     context = OpenAILLMContext(
