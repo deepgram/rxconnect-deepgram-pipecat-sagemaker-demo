@@ -18,3 +18,7 @@ client/.next/
 # OS
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
+
+# Kit assets (copied by postinstall)
+client/public/vdui/

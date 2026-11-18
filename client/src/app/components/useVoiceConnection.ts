@@ -1,20 +1,14 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useReducer } from 'react';
 
-export interface Message {
-  id: string;
-  text: string;
-  speaker: 'user' | 'assistant';
-  timestamp: Date;
-}
+import { agentReducer, initialAgentView, type AgentEvent } from '@/voice/agentTurns';
 
 export interface VoiceConnectionState {
   isConnected: boolean;
   isListening: boolean;
   isMuted: boolean;
   status: string;
-  messages: Message[];
   error: string | null;
 }
 
@@ -46,7 +40,6 @@ export function useVoiceConnection(wsUrl?: string) {
     isListening: false,
     isMuted: false,
     status: 'Disconnected',
-    messages: [],
     error: null,
   });
 
@@ -57,16 +50,13 @@ export function useVoiceConnection(wsUrl?: string) {
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const addMessage = useCallback((text: string, speaker: 'user' | 'assistant') => {
-    if (!text.trim()) return;
-    const msg: Message = {
-      id: Date.now().toString() + Math.random(),
-      text,
-      speaker,
-      timestamp: new Date(),
-    };
-    setState(prev => ({ ...prev, messages: [...prev.messages, msg] }));
-  }, []);
+  // The kit's view of the call (src/voice/agentTurns.ts), fed from the same messages
+  const [view, dispatch] = useReducer(agentReducer, initialAgentView);
+  // The voice ring's level, 0..1: the louder of the caller's mic and the agent's playback
+  const levelRef = useRef(0);
+  const micLevelRef = useRef(0);
+  const playersRef = useRef(new Set<AnalyserNode>());
+  const playingRef = useRef(0);
 
   const playAudio = useCallback((base64Data: string, sampleRate: number) => {
     try {
@@ -88,9 +78,18 @@ export function useVoiceConnection(wsUrl?: string) {
 
       const source = playbackCtx.createBufferSource();
       source.buffer = buffer;
-      source.connect(playbackCtx.destination);
+      const analyser = playbackCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      analyser.connect(playbackCtx.destination);
       source.start();
-      source.onended = () => playbackCtx.close();
+      playersRef.current.add(analyser);
+      if (playingRef.current++ === 0) dispatch({ type: 'PlaybackStarted' });
+      source.onended = () => {
+        playersRef.current.delete(analyser);
+        playbackCtx.close();
+        if (--playingRef.current === 0) dispatch({ type: 'PlaybackEnded' });
+      };
     } catch (e) {
       console.error('Audio playback error:', e);
     }
@@ -121,10 +120,13 @@ export function useVoiceConnection(wsUrl?: string) {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
           const inputData = e.inputBuffer.getChannelData(0);
           const int16 = new Int16Array(inputData.length);
+          let sum = 0;
           for (let i = 0; i < inputData.length; i++) {
             const s = Math.max(-1, Math.min(1, inputData[i]));
             int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+            sum += s * s;
           }
+          micLevelRef.current = Math.max(micLevelRef.current, Math.sqrt(sum / inputData.length));
           wsRef.current.send(int16.buffer);
         }
       };
@@ -159,6 +161,7 @@ export function useVoiceConnection(wsUrl?: string) {
   const connect = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, status: 'Connecting...', error: null }));
+      dispatch({ type: 'reset' });
 
       const token = await fetchWsToken(httpBase);
       const ws = new WebSocket(`${wsBase}/ws/voice?token=${encodeURIComponent(token)}`);
@@ -183,11 +186,9 @@ export function useVoiceConnection(wsUrl?: string) {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          dispatch(data as AgentEvent);
 
           switch (data.type) {
-            case 'transcript':
-              addMessage(data.text, data.speaker);
-              break;
             case 'audio':
               playAudio(data.data, data.sampleRate || 16000);
               break;
@@ -233,7 +234,7 @@ export function useVoiceConnection(wsUrl?: string) {
         status: 'Error',
       }));
     }
-  }, [wsBase, httpBase, addMessage, playAudio, startMicrophone, stopMicrophone]);
+  }, [wsBase, httpBase, playAudio, startMicrophone, stopMicrophone]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
@@ -269,13 +270,6 @@ export function useVoiceConnection(wsUrl?: string) {
     }
   }, []);
 
-  const resetConversation = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'reset' }));
-    }
-    setState(prev => ({ ...prev, messages: [] }));
-  }, []);
-
   useEffect(() => {
     return () => {
       if (wsRef.current) {
@@ -288,11 +282,42 @@ export function useVoiceConnection(wsUrl?: string) {
     };
   }, [stopMicrophone]);
 
+  /** A clicked prompt: the server handles it as if the caller had said it */
+  const sendText = useCallback((text: string) => {
+    const ws = wsRef.current;
+    if (ws?.readyState === WebSocket.OPEN && text.trim()) {
+      ws.send(JSON.stringify({ type: 'user-text', text }));
+    }
+  }, []);
+
+  // Smooth the level for the ring, once a frame
+  useEffect(() => {
+    const buf = new Float32Array(1024);
+    let frame = 0;
+    const tick = () => {
+      let playback = 0;
+      for (const analyser of playersRef.current) {
+        analyser.getFloatTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        playback = Math.max(playback, Math.sqrt(sum / buf.length));
+      }
+      const target = Math.min(1, Math.max(playback, micLevelRef.current) * 4);
+      levelRef.current += (target - levelRef.current) * 0.3;
+      micLevelRef.current *= 0.92;
+      frame = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   return {
     ...state,
+    view,
+    levelRef,
     connect,
     disconnect,
     toggleMute,
-    resetConversation,
+    sendText,
   };
 }
