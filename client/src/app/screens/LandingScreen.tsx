@@ -34,7 +34,7 @@ export function LandingScreen({
           {connecting ? 'Connecting…' : 'Start conversation'}
         </CtaButton>
       }
-      note="Talk naturally. We’ll ask for microphone access. Need a member ID? Open the gear, then Data."
+      note="Talk naturally. We’ll ask for microphone access. Sample member IDs appear once the call starts."
       footer={<PartnerLogos />}
     />
   );

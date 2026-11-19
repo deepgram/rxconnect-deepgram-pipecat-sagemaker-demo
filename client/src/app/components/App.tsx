@@ -14,7 +14,7 @@ import { FocusProvider, WIDE, useFocus, useMediaQuery, useSimulatedLevel } from 
 import { initialAgentView, type AgentView } from '@/voice/agentTurns';
 import { SAMPLE_ORDER, rxconnect } from '@/voice/example';
 import { toRecordView } from '@/voice/record';
-import { fetchRandomOrder, stepsFor } from '@/voice/sampleSteps';
+import { fetchOrders, pickAnotherOrder, pickRandomOrder, stepsFor } from '@/voice/sampleSteps';
 import type { Order } from '@/voice/order';
 
 import { AboutDrawer } from '../screens/AboutDrawer';
@@ -78,22 +78,31 @@ export const App = () => {
     if (!isConnected) setDetails(false);
   }, [isConnected]);
 
-  // Each call gets a random sample order, and the steps to retrieve it
+  // Each call loads the sample members, and picks one at random with the steps to retrieve it
+  const [orders, setOrders] = useState<Order[] | null>(null);
   const [sample, setSample] = useState<Order | null>(null);
+  const wantOrders = isConnected || fixture !== null;
   useEffect(() => {
-    if (!isConnected) {
+    if (!wantOrders) {
       setSample(null);
       return;
     }
     const abort = new AbortController();
-    fetchRandomOrder(abort.signal)
-      .then(setSample)
+    fetchOrders(abort.signal)
+      .then((list) => {
+        setOrders(list);
+        // Fixtures start from the sample order, so screenshots stay the same
+        setSample(fixture ? SAMPLE_ORDER : pickRandomOrder(list));
+      })
       .catch((e) => {
-        if (!abort.signal.aborted) console.error('Could not pick a sample order:', e);
+        if (!abort.signal.aborted) console.error('Could not load the sample members:', e);
       });
     return () => abort.abort();
-  }, [isConnected]);
-  const sampleOrder = fixture ? SAMPLE_ORDER : sample;
+  }, [wantOrders]);
+  const sampleOrder = sample ?? (fixture ? SAMPLE_ORDER : null);
+  const anotherSample = () => {
+    if (orders?.length) setSample(pickAnotherOrder(orders, sampleOrder));
+  };
   const steps = useMemo(() => (sampleOrder ? stepsFor(sampleOrder) : null), [sampleOrder]);
 
   const callView = fixture ? fixtureView(fixture) : view;
@@ -130,7 +139,7 @@ export const App = () => {
           {screen === 'review' && record ? (
             <RecordScreen call={call} record={record} />
           ) : (
-            <CallScreen call={call} record={screen === 'listening' ? null : record} steps={steps} onOpenRecord={() => setDetails(true)} />
+            <CallScreen call={call} record={screen === 'listening' ? null : record} steps={steps} members={orders ?? (fixture ? [SAMPLE_ORDER] : null)} suggested={sampleOrder} onAnotherSample={anotherSample} onOpenRecord={() => setDetails(true)} />
           )}
         </FocusProvider>
       )}

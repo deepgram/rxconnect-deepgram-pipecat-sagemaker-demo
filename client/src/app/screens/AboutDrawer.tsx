@@ -2,7 +2,7 @@
 
 /**
  * Settings → About this app. A toggle switches between Info (what it does, the source) and
- * Data (the sample members to try, which was the Data Browser).
+ * Data (the sample orders, prescriptions, and members to try: the old Data Browser's three views).
  * Opening it mid-call pauses the mic; App resumes it on close.
  */
 import { useEffect, useState } from 'react';
@@ -16,37 +16,15 @@ import {
   QrCode,
   SegmentedControl,
   Section,
-  StatusPill,
-  type DataGridColumn,
 } from '@deepgram-devs/dg-brand-ui';
 
 import { rxconnect } from '@/voice/example';
-import { statusLabel, type Order } from '@/voice/order';
-import { orderTone } from '@/voice/record';
+import type { Order } from '@/voice/order';
+import { SAMPLE_VIEWS, sampleRows, type SampleView } from '@/voice/sampleData';
 
-const COLUMNS: DataGridColumn<Order>[] = [
-  { key: 'member_id', header: 'Member', primary: true },
-  {
-    key: 'medication',
-    header: 'Order',
-    cell: (o) => (
-      <>
-        {o.prescriptions.map((p) => p.name).join(', ')}
-        <span className="block text-sm text-muted tabular-nums">{o.order_id}</span>
-      </>
-    ),
-    sortValue: (o) => o.prescriptions[0]?.name ?? '',
-  },
-  {
-    key: 'status',
-    header: 'Status',
-    cell: (o) => {
-      const label = statusLabel(o.status);
-      return <StatusPill tone={orderTone(label)}>{label}</StatusPill>;
-    },
-    sortValue: (o) => statusLabel(o.status),
-  },
-];
+import { sampleColumns } from './sampleColumns';
+
+const COLUMNS = sampleColumns('paper');
 
 export type AboutTab = 'info' | 'data';
 
@@ -57,6 +35,7 @@ const TABS = [
 
 export function AboutDrawer({ onClose, initialTab = 'info' }: { onClose: () => void; initialTab?: AboutTab }) {
   const [tab, setTab] = useState<AboutTab>(initialTab);
+  const [view, setView] = useState<SampleView>('orders');
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -97,15 +76,25 @@ export function AboutDrawer({ onClose, initialTab = 'info' }: { onClose: () => v
           </Section>
         </>
       ) : (
-        <Section title="Sample members">
+        <Section title="Sample data">
           <p className="leading-relaxed text-muted">Say any of these member IDs on a call. Each member has one order.</p>
+          <SegmentedControl
+            className="mt-4"
+            label="Sample data view"
+            tone="paper"
+            kind="tab"
+            options={SAMPLE_VIEWS}
+            value={view}
+            onChange={setView}
+          />
           <DataGrid
+            key={view}
             className="mt-4"
             tone="paper"
-            title={orders ? `${orders.length} orders` : undefined}
-            rows={orders ?? []}
-            columns={COLUMNS}
-            rowId={(o) => o.order_id}
+            title={orders ? `${sampleRows(view, orders).length} ${view}` : undefined}
+            rows={orders ? sampleRows(view, orders) : []}
+            columns={COLUMNS[view]}
+            rowId={(r) => r.key}
             empty={failed ? 'We couldn’t load the sample data. Is the server running?' : orders ? undefined : 'Loading…'}
           />
         </Section>
