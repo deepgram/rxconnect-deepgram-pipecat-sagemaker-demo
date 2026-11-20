@@ -39,6 +39,8 @@ from loguru import logger
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
+from pipecat.audio.vad.silero import SileroVADAnalyzer
+from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.frames.frames import (
     OutputTransportMessageFrame,
     OutputTransportMessageUrgentFrame,
@@ -66,7 +68,7 @@ from pipecat.transports.websocket.fastapi import (
 from services.serializer import RxConnectFrameSerializer
 from services.processors import (
     AssistantTranscriptAccumulator,
-    AudioAccumulator,
+    BrowserAudioOut,
     UserTranscriptForwarder,
 )
 from services.pharmacy import (
@@ -185,8 +187,10 @@ async def _create_pipeline(
             audio_in_enabled=True,
             audio_out_enabled=True,
             add_wav_header=False,
-            vad_enabled=True,
-            vad_audio_passthrough=True,
+            # Real VAD, so the caller interrupts the agent the moment they start
+            # talking (without it, turns start only once a transcript arrives).
+            # stop_secs: the pause that ends the caller's turn.
+            vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.5)),
             serializer=RxConnectFrameSerializer(),
         ),
         input_name="RxConnect-in",
@@ -374,7 +378,7 @@ async def _create_pipeline(
     # ── Custom processors ──────────────────────────────────────────────
     user_transcript_fwd = UserTranscriptForwarder()
     assistant_transcript_acc = AssistantTranscriptAccumulator()
-    audio_acc = AudioAccumulator()
+    audio_out = BrowserAudioOut()
 
     # ── Pipeline ───────────────────────────────────────────────────────
     #
@@ -392,7 +396,7 @@ async def _create_pipeline(
     #             │
     #           TTS
     #             │
-    #   AudioAccumulator ──(buffers chunks into one blob)
+    #   BrowserAudioOut ──(streams audio chunks; bot-speaking frames from browser playback)
     #             │
     #   Audio Out ┘
     #             │
@@ -407,7 +411,7 @@ async def _create_pipeline(
             llm,
             assistant_transcript_acc,
             tts,
-            audio_acc,
+            audio_out,
             transport.output(),
             context_aggregator.assistant(),
         ]
