@@ -296,7 +296,7 @@ Deploying speech recognition through AWS SageMaker provides enterprise security 
 
 ## License
 
-MIT License — Use this for learning and building your own voice agents!
+MIT License — Use this for learning and building your own voice agents! See [LICENSE](LICENSE). The included UI kit is MIT licensed too ([client/vendor/dg-brand-ui/LICENSE](client/vendor/dg-brand-ui/LICENSE)).
 
 ## Resources
 

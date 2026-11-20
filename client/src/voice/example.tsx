@@ -54,6 +54,7 @@ export const rxconnect: DemoExample = {
   domain: 'Pharmacy',
   brand: { name: 'RxConnect', tagline: 'Pharmacy · Prescriptions', deskTagline: 'Pharmacy desk', mark: <RxConnectMark /> },
   hero: {
+    // Generated with ChatGPT image generation: no people or real brand names in it
     src: '/images/pharmacy-hero.jpg',
     alt: 'A bright pharmacy counter with prescription bottles in front of stocked shelves.',
     // Phones crop the photo: keep the bottles in view
