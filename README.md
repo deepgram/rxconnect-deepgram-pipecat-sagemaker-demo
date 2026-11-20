@@ -35,7 +35,7 @@ All steps are powered by **real time streaming speech recognition and conversati
 | 3 | Language Model | The transcript is sent to OpenAI GPT 4o mini for reasoning and tool execution. |
 | 4 | Backend Data | The model calls structured functions to retrieve order, medication, and refill data from the pharmacy database. |
 | 5 | Deepgram Text to Speech | The system response is converted into natural speech using Deepgram Aura 2. |
-| 6 | Output Audio | The synthesized audio is streamed back through the WebSocket and played in the browser. |
+| 6 | Output Audio | The synthesized audio is streamed back through the WebSocket as it's generated. The browser plays each chunk as it arrives and stops the moment the caller talks over the agent. |
 
 
 
@@ -105,14 +105,16 @@ rxconnect-voice-agent/
 │       └── llm.py
 │
 ├── client/
-│   ├── src/app/
-│   │   ├── components/
-│   │   │   ├── App.tsx
-│   │   │   ├── ConversationPanel.tsx
-│   │   │   ├── DatabasePanel.tsx
-│   │   │   └── useVoiceConnection.ts
-│   │   ├── page.tsx
-│   │   └── globals.css
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   │   ├── App.tsx                 # Screens and call state
+│   │   │   │   └── useVoiceConnection.ts   # WebSocket, microphone, and audio playback
+│   │   │   ├── screens/                    # Landing, call, and record screens, sample data grid
+│   │   │   ├── page.tsx
+│   │   │   └── globals.css
+│   │   └── voice/                          # Server messages mapped to the UI kit's transcript and record
+│   ├── vendor/dg-brand-ui/                 # Deepgram's UI kit, installed from here
 │   ├── public/
 │   └── package.json
 │
@@ -130,7 +132,7 @@ rxconnect-voice-agent/
 ## Prerequisites
 
 - Python 3.9 or later  
-- Node.js 18 or later  
+- Node.js 20.19 or later  
 - Deepgram API Key  
 - OpenAI API Key  
 - AWS account with a SageMaker endpoint hosting the Deepgram Nova 3 model  
@@ -144,10 +146,8 @@ AWS credentials should be configured through environment variables or the `~/.aw
 ## Clone the Repository
 
 ```
-
-git clone [https://github.com/deepgram/rxconnect-deepgram-pipecat-sagemaker-demo.git](https://github.com/deepgram/rxconnect-deepgram-pipecat-sagemaker-demo.git)
+git clone https://github.com/deepgram/rxconnect-deepgram-pipecat-sagemaker-demo.git
 cd rxconnect-deepgram-pipecat-sagemaker-demo
-
 ```
 
 
@@ -190,9 +190,7 @@ python main.py
 The server will run at:
 
 ```
-
-[http://localhost:8000](http://localhost:8000)
-
+http://localhost:8000
 ```
 
 
@@ -200,29 +198,36 @@ The server will run at:
 ## Frontend Setup
 
 ```
-
 cd client
 npm install
 npm run dev
-
 ```
 
 The user interface will be available at:
 
 ```
-
-[http://localhost:3000](http://localhost:3000)
-
+http://localhost:3000
 ```
+
+### The UI kit
+
+The client's look (the landing, call, and record screens, the transcript panel, and the voice ring) comes from Deepgram's UI kit, `@deepgram-devs/dg-brand-ui`. The kit is included in this repository at `client/vendor/dg-brand-ui`, and `npm install` installs it from there, so there's nothing extra to set up.
+
+`npm install` also copies the kit's fonts and images into `client/public/vdui/` (the `postinstall` script). That folder is generated, so it isn't committed.
 
 
 
 # Testing the Voice Agent
 
 1. Open `http://localhost:3000` in a browser.  
-2. Select **Connect** to establish the WebSocket connection.  
+2. Select **Start conversation** and allow microphone access.  
 3. The assistant will greet you automatically.  
-4. Speak naturally to begin interacting with the system.
+4. Speak naturally, or select one of the suggested prompts. The call screen shows a sample member ID to use, and the sample orders the agent can look up.  
+5. Talk over the agent at any time: it stops speaking and listens.  
+
+## Deploying
+
+The `Dockerfile` copies a client that was built ahead of time, so run `npm install` and `npm run build` in `client/` before you build the image.
 
 
 
@@ -284,14 +289,14 @@ Deploying speech recognition through AWS SageMaker provides enterprise security 
 | Language Model | OpenAI GPT 4o mini | Conversational reasoning |
 | Speech Synthesis | Deepgram Aura 2 | Natural voice generation |
 | Backend | Python FastAPI WebSockets | Voice orchestration |
-| Frontend | Next.js React Tailwind | Browser interface |
+| Frontend | Next.js, React 19, Tailwind CSS 4, Deepgram UI kit | Browser interface |
 | Data | JSON | Pharmacy database |
 
 
 
 ## License
 
-MIT License — Use this for learning and building your own voice agents!
+MIT License — Use this for learning and building your own voice agents! See [LICENSE](LICENSE). The included UI kit is MIT licensed too ([client/vendor/dg-brand-ui/LICENSE](client/vendor/dg-brand-ui/LICENSE)).
 
 ## Resources
 

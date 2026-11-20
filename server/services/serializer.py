@@ -12,6 +12,7 @@ existing React frontend unchanged.
 
 import base64
 import json
+from dataclasses import dataclass
 from typing import Optional
 
 from loguru import logger
@@ -21,11 +22,26 @@ from pipecat.frames.frames import (
     Frame,
     InputAudioRawFrame,
     InterruptionFrame,
+    LLMMessagesAppendFrame,
     OutputTransportMessageFrame,
     OutputTransportMessageUrgentFrame,
     StartFrame,
+    SystemFrame,
 )
 from pipecat.serializers.base_serializer import FrameSerializer
+
+
+@dataclass
+class BrowserPlaybackEndedFrame(SystemFrame):
+    """The browser has played every audio chunk it was sent (``{"type":"playback-ended"}``).
+
+    A system frame, so it reaches ``BrowserAudioOut`` even while the TTS service
+    has paused its queue to wait for the bot to stop speaking.
+    """
+
+
+# A clicked prompt is a short sentence; cap what the client can send
+MAX_USER_TEXT = 500
 
 
 class RxConnectFrameSerializer(FrameSerializer):
@@ -34,11 +50,14 @@ class RxConnectFrameSerializer(FrameSerializer):
     Wire format (client → server):
         binary  – raw PCM int16 mono audio at ``input_sample_rate``
         text    – JSON control messages: ``{"type":"ping"}``, ``{"type":"reset"}``
+        text    – ``{"type":"user-text","text":"…"}``: a clicked prompt, handled as if spoken
+        text    – ``{"type":"playback-ended"}``: the browser has played all the audio it was sent
 
     Wire format (server → client):
         text    – ``{"type":"audio","data":"<b64>","sampleRate":…,"encoding":"linear16"}``
         text    – ``{"type":"transcript","text":"…","speaker":"user"|"assistant"}``
         text    – ``{"type":"status","status":"…","message":"…"}``
+        text    – ``{"type":"clear"}``: the caller interrupted; drop any audio not yet played
         text    – ``{"type":"pong"}``
     """
 
@@ -87,6 +106,17 @@ class RxConnectFrameSerializer(FrameSerializer):
                 msg_type = msg.get("type", "")
                 if msg_type == "ping":
                     return OutputTransportMessageFrame(message={"type": "pong"})
+                if msg_type == "playback-ended":
+                    return BrowserPlaybackEndedFrame()
+                if msg_type == "user-text":
+                    # A prompt the caller clicked: add it to the conversation as the
+                    # caller's words and run the LLM, as if it had been spoken.
+                    text = str(msg.get("text", "")).strip()[:MAX_USER_TEXT]
+                    if text:
+                        return LLMMessagesAppendFrame(
+                            messages=[{"role": "user", "content": text}], run_llm=True
+                        )
+                    return None
                 logger.debug(f"Unhandled client text message: {msg_type}")
             except json.JSONDecodeError:
                 logger.warning("Non-JSON text message received from client")

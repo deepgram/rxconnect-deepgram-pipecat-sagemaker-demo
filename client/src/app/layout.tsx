@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from 'next';
+import type { CSSProperties } from 'react';
 import { Work_Sans, Azeret_Mono } from 'next/font/google';
-import '../deepgram-brand.css';
 import './globals.css';
 
-const workSans = Work_Sans({ subsets: ['latin'], variable: '--font-work-sans', display: 'swap' });
-const azeretMono = Azeret_Mono({ subsets: ['latin'], variable: '--font-azeret-mono', display: 'swap' });
+const workSans = Work_Sans({ subsets: ['latin', 'latin-ext'], display: 'swap' });
+const azeretMono = Azeret_Mono({ subsets: ['latin', 'latin-ext'], display: 'swap' });
+
+// The kit's theme.css reads these: --font-sans: var(--font-brand-sans, "Work Sans", ...)
+const FONT_STACKS = {
+  '--font-brand-sans': `${workSans.style.fontFamily}, ui-sans-serif, system-ui, sans-serif`,
+  '--font-brand-mono': `${azeretMono.style.fontFamily}, ui-monospace, monospace`,
+} as CSSProperties;
 
 export const metadata: Metadata = {
   title: 'RxConnect - Voice Assistant',
@@ -21,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0a0a',
+  themeColor: '#1d1d1d',
 };
 
 export default function RootLayout({
@@ -30,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`is-dark ${workSans.variable} ${azeretMono.variable}`}>
+    <html lang="en" style={FONT_STACKS}>
       <body>{children}</body>
     </html>
   );
