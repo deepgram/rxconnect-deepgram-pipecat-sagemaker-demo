@@ -26,9 +26,6 @@ export type SampleRow = {
   status: string;
 };
 
-const ORDER_COUNT = (n: number) => `${n} ${n === 1 ? 'order' : 'orders'}`;
-export const orderCount = ORDER_COUNT;
-
 function orderRow(order: Order, key = order.order_id): SampleRow {
   return {
     key,
@@ -76,16 +73,4 @@ export function sampleRows(view: SampleView, orders: Order[], suggestedMemberId?
   }
   if (!suggestedMemberId) return rows;
   return [...rows.filter((r) => r.memberId === suggestedMemberId), ...rows.filter((r) => r.memberId !== suggestedMemberId)];
-}
-
-/** What a card in each view shows: its own ID small, the thing itself large, related IDs under it */
-export function cardFor(view: SampleView, row: SampleRow): { recordId: string; title: string; subtitle: string } {
-  if (view === 'orders') {
-    return { recordId: row.orderIds[0], title: row.medication, subtitle: `Member ${row.memberId} · ${row.rxIds.join(', ')}` };
-  }
-  if (view === 'prescriptions') {
-    const refills = `${row.refills} ${row.refills === 1 ? 'refill' : 'refills'}`;
-    return { recordId: row.rxIds[0], title: row.medication, subtitle: `Qty ${row.quantity} · ${refills} · ${row.orderIds[0]}` };
-  }
-  return { recordId: ORDER_COUNT(row.orderIds.length), title: row.memberId, subtitle: `${row.orderIds.join(', ')} · ${row.rxIds.join(', ')}` };
 }
