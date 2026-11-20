@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@deepgram-devs/dg-brand-ui": "github:deepgram-devs/dg-brand-ui#v0.5.0",
+    "@deepgram-devs/dg-brand-ui": "file:vendor/dg-brand-ui",
     "next": "15.5.12",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
