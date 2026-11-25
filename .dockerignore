@@ -12,3 +12,8 @@ server/config/.env
 __pycache__/
 *.pyc
 .DS_Store
+
+# Never bake env files into the image
+.env
+.env.*
+**/.env

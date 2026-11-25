@@ -22,3 +22,8 @@ Thumbs.db
 
 # Kit assets (copied by postinstall)
 client/public/vdui/
+
+# Local env files at the repo root
+.env
+.env.*
+!.env.example
