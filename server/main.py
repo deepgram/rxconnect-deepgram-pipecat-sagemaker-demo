@@ -19,6 +19,7 @@ Pipecat frames so ``FastAPIWebsocketTransport`` can drive the pipeline.
 See ``server/main_backup.py`` for the previous hand-rolled implementation.
 """
 
+import dataclasses
 import hashlib
 import hmac
 import os
@@ -38,6 +39,8 @@ from loguru import logger
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
+from pipecat.audio.vad.silero import SileroVADAnalyzer
+from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.frames.frames import (
     OutputTransportMessageFrame,
     OutputTransportMessageUrgentFrame,
@@ -65,11 +68,12 @@ from pipecat.transports.websocket.fastapi import (
 from services.serializer import RxConnectFrameSerializer
 from services.processors import (
     AssistantTranscriptAccumulator,
-    AudioAccumulator,
+    BrowserAudioOut,
     UserTranscriptForwarder,
 )
 from services.pharmacy import (
     load_pharmacy_data,
+    normalize_id,
     verify_member_id,
     list_member_orders,
     get_order_details,
@@ -183,8 +187,10 @@ async def _create_pipeline(
             audio_in_enabled=True,
             audio_out_enabled=True,
             add_wav_header=False,
-            vad_enabled=True,
-            vad_audio_passthrough=True,
+            # Real VAD, so the caller interrupts the agent the moment they start
+            # talking (without it, turns start only once a transcript arrives).
+            # stop_secs: the pause that ends the caller's turn.
+            vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.5)),
             serializer=RxConnectFrameSerializer(),
         ),
         input_name="RxConnect-in",
@@ -292,13 +298,63 @@ async def _create_pipeline(
         logger.info(f"[{session_id}] end_session → {result}")
         await params.result_callback(result)
 
-    llm.register_function("verify_member_id", _on_verify_member_id)
-    llm.register_function("list_member_orders", _on_list_member_orders)
-    llm.register_function("get_order_details", _on_get_order_details)
-    llm.register_function("get_order_timing", _on_get_order_timing)
-    llm.register_function("get_order_refills", _on_get_order_refills)
-    llm.register_function("lookup_order_status", _on_lookup_order_status)
-    llm.register_function("end_session", _on_end_session)
+    # ── Messages for the browser UI ────────────────────────────────────
+    # Additive only: the tools, their results, and the prompt are unchanged.
+    #   {"type":"function-call", id, name, args, status:"running"|"completed", ms?}
+    #       → the session panel's function rows
+    #   {"type":"record-loaded", order}
+    #       → the record screen, once an order is verified for the member
+
+    async def _send_ui(message: dict):
+        await task.queue_frame(OutputTransportMessageUrgentFrame(message=message))
+
+    def _verified_order():
+        """The session's current order, only if it belongs to the verified member."""
+        order_id, member_id = session_state["order_id"], session_state["member_id"]
+        if not order_id or not member_id:
+            return None
+        return next(
+            (
+                o
+                for o in load_pharmacy_data()
+                if normalize_id(o["order_id"]) == normalize_id(order_id)
+                and normalize_id(o["member_id"]) == member_id
+            ),
+            None,
+        )
+
+    def _with_ui_messages(handler):
+        async def wrapped(params: FunctionCallParams):
+            started = time.monotonic()
+            call = {
+                "type": "function-call",
+                "id": params.tool_call_id,
+                "name": params.function_name,
+                "args": dict(params.arguments),
+            }
+            await _send_ui({**call, "status": "running"})
+            original_callback = params.result_callback
+
+            async def result_callback(result, *args, **kwargs):
+                ms = round((time.monotonic() - started) * 1000)
+                await _send_ui({**call, "status": "completed", "ms": ms})
+                order = _verified_order()
+                if order and order["order_id"] != session_state.get("shown_order_id"):
+                    session_state["shown_order_id"] = order["order_id"]
+                    await _send_ui({"type": "record-loaded", "order": order})
+                await original_callback(result, *args, **kwargs)
+
+            await handler(dataclasses.replace(params, result_callback=result_callback))
+
+        return wrapped
+
+    llm.register_function("verify_member_id", _with_ui_messages(_on_verify_member_id))
+    llm.register_function("list_member_orders", _with_ui_messages(_on_list_member_orders))
+    llm.register_function("get_order_details", _with_ui_messages(_on_get_order_details))
+    llm.register_function("get_order_timing", _with_ui_messages(_on_get_order_timing))
+    llm.register_function("get_order_refills", _with_ui_messages(_on_get_order_refills))
+    llm.register_function("lookup_order_status", _with_ui_messages(_on_lookup_order_status))
+    llm.register_function("end_session", _with_ui_messages(_on_end_session))
 
     # ── LLM context (conversation memory + tools) ─────────────────────
     context = OpenAILLMContext(
@@ -322,7 +378,7 @@ async def _create_pipeline(
     # ── Custom processors ──────────────────────────────────────────────
     user_transcript_fwd = UserTranscriptForwarder()
     assistant_transcript_acc = AssistantTranscriptAccumulator()
-    audio_acc = AudioAccumulator()
+    audio_out = BrowserAudioOut()
 
     # ── Pipeline ───────────────────────────────────────────────────────
     #
@@ -340,7 +396,7 @@ async def _create_pipeline(
     #             │
     #           TTS
     #             │
-    #   AudioAccumulator ──(buffers chunks into one blob)
+    #   BrowserAudioOut ──(streams audio chunks; bot-speaking frames from browser playback)
     #             │
     #   Audio Out ┘
     #             │
@@ -355,7 +411,7 @@ async def _create_pipeline(
             llm,
             assistant_transcript_acc,
             tts,
-            audio_acc,
+            audio_out,
             transport.output(),
             context_aggregator.assistant(),
         ]

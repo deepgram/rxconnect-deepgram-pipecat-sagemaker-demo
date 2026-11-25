@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // The kit ships TypeScript source
+  transpilePackages: ["@deepgram-devs/dg-brand-ui"],
   async rewrites() {
     return [
       {

@@ -1,10 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '@deepgram-devs/dg-brand-ui/theme.css';
 
-/* Point the brand layer's font tokens at the next/font self-hosted families. */
-:root {
-  --font-sans: var(--font-work-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Perfektta", var(--font-work-sans), system-ui, sans-serif;
-  --font-mono: var(--font-azeret-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+/* App-specific utilities go here. Don't redefine the kit's tokens. */
+
+/*
+  Thin scrollbars for every scroll area inside the page (the sample data, the transcript, the
+  drawer); the page's own scrollbar stays the browser's. The thumb is the text color at 35%, so
+  it's a faint white line on the stage and a faint ink line on paper.
+*/
+@layer base {
+  /* Chrome, Edge, Safari: a 4px line with no track or arrows */
+  body *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  body *::-webkit-scrollbar-track,
+  body *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  body *::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 999px;
+  }
+  body *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, currentColor 55%, transparent);
+  }
+  body *::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
+/* Firefox has no ::-webkit-scrollbar. Only Firefox gets these, because Chrome ignores the rules above once they're set. */
+@supports not selector(::-webkit-scrollbar) {
+  body * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, currentColor 35%, transparent) transparent;
+  }
 }
