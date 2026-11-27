@@ -89,6 +89,11 @@ from pipecat.services.llm_service import FunctionCallParams
 # ---------------------------------------------------------------------------
 load_dotenv(Path(__file__).parent / "config" / ".env", override=False)
 
+# Redact API keys from every log line, including Pipecat's own
+from services import log_redaction
+
+log_redaction.install()
+
 from config import (
     SAGEMAKER_CONFIG,
     TTS_CONFIG,
